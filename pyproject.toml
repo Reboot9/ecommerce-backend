@@ -1,0 +1,38 @@
+[tool.poetry]
+name = "ecommerce-backend"
+version = "0.1.0"
+description = ""
+authors = ["Reboot <sergejskorikjr@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+django = "^4.2.7"
+python-dotenv = "^1.0.0"
+djangorestframework = "^3.14.0"
+django-debug-toolbar = "^4.2.0"
+ruff = "^0.1.5"
+pre-commit = "^3.5.0"
+
+[tool.ruff]
+# Set the maximum line length to 79.
+line-length = 99
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["E402"]
+"migrations" = ["E501"]
+
+[tool.ruff.lint]
+# Add the `line-too-long` rule to the enforced rule set.
+extend-select = [
+  "E501",
+  "UP",  # pyupgrade
+  # "D",   # pydocstyle
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
