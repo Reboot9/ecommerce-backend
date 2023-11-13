@@ -15,19 +15,20 @@ ruff = "^0.1.5"
 pre-commit = "^3.5.0"
 
 [tool.ruff]
-# Set the maximum line length to 79.
+# Set the maximum line length
 line-length = 99
+exclude = ["migrations"]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["E402"]
-"migrations" = ["E501"]
+
 
 [tool.ruff.lint]
 # Add the `line-too-long` rule to the enforced rule set.
 extend-select = [
   "E501",
   "UP",  # pyupgrade
-  # "D",   # pydocstyle
+  "D",   # pydocstyle
 ]
 
 [tool.ruff.lint.pydocstyle]
