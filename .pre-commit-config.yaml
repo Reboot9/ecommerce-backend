@@ -1,4 +1,14 @@
 repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.3.0
+    hooks:
+      # Validate YAML files for correct syntax and structure
+      - id: check-yaml
+      # Append newline characters to files without them
+      - id: end-of-file-fixer
+      # Remove trailing whitespace at the end of lines
+      - id: trailing-whitespace
+
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
     rev: v0.1.5
