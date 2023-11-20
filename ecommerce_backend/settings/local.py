@@ -1,9 +1,14 @@
 # noqa
 from .base import *  # noqa: F403
+import socket
 
 DEBUG = True
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
+
+# this is required for django debug toolbar to work with Docker
+hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
+INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips] + ["127.0.0.1", "10.0.2.2"]
 
 DATABASES = {
     "default": {
