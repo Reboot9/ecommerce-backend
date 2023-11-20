@@ -25,6 +25,8 @@ services:
       - ./.env
     volumes:
       - .:/ecommerce_backend
+      - static_volume:/ecommerce_backend/static
+      - media_volume:/ecommerce_backend/media
     ports:
       - "8000:8000"
     networks:
@@ -33,6 +35,8 @@ services:
       - db
 
 volumes:
+  static_volume:
+  media_volume:
   postgres_data:
 
 networks:

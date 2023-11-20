@@ -3,6 +3,8 @@ set -e
 
 export DJANGO_SETTINGS_MODULE=ecommerce_backend.settings.local
 
+python manage.py collectstatic --noinput
+
 # Apply migrations
 until python3 manage.py migrate
 do
