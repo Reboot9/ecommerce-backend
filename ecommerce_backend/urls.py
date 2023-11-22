@@ -22,7 +22,6 @@ from django.contrib import admin
 from django.urls import path, include, re_path
 from rest_framework import permissions
 from rest_framework.routers import DefaultRouter
-from rest_framework_simplejwt import views as jwt_views
 from apps.accounts import views
 
 # Rest framework routers
@@ -33,8 +32,8 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include(router.urls)),
     # JWT token endpoints
-    path("api/token/", jwt_views.TokenObtainPairView.as_view(), name="token_obtain_pair"),
-    path("api/token/refresh/", jwt_views.TokenRefreshView.as_view(), name="token_refresh"),
+    path("api/token/", views.DecoratedTokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("api/token/refresh/", views.DecoratedTokenRefreshView.as_view(), name="token_refresh"),
 ]
 
 if settings.DEBUG:
