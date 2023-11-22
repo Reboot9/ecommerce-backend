@@ -15,6 +15,10 @@ from apps.accounts.serializers.token import TokenRefreshResponseSerializer
 from apps.accounts.serializers.user import UserSerializer
 
 
+# TODO: consider about adding more Swagger things like tags
+#  and implement authentication in Swagger via JWT
+
+
 class DecoratedTokenObtainPairView(jwt_views.TokenObtainPairView):
     """
     Extended view for obtaining JSON Web Tokens with Swagger documentation.

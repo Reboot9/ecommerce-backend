@@ -4,6 +4,10 @@ from .base import *  # noqa: F403
 DEBUG = True
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
+if DEBUG:
+    INSTALLED_APPS += [
+        "debug_toolbar",
+    ]
 
 DATABASES = {
     "default": {
