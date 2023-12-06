@@ -181,6 +181,7 @@ class UserViewSet(viewsets.ModelViewSet):
     User management API.
     """
 
+    # TODO: add pagination
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
 
