@@ -19,10 +19,12 @@ class CustomUserCreationForm(UserCreationForm):
     password1 = forms.CharField(
         label="Password",
         strip=False,
+        widget=forms.PasswordInput,
     )
     password2 = forms.CharField(
         label="Password Confirmation",
         strip=False,
+        widget=forms.PasswordInput,
     )
 
     class Meta:

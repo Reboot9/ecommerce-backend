@@ -17,9 +17,18 @@ class CustomUserAdmin(BaseUserAdmin):
     """
 
     add_form = CustomUserCreationForm
-    list_display = ("email", "first_name", "last_name", "is_active", "is_staff", "is_superuser")
+    list_display = (
+        "email",
+        "first_name",
+        "last_name",
+        "created_at",
+        "updated_at",
+        "is_staff",
+        "is_superuser",
+        "is_active",
+    )
     search_fields = ("email", "first_name", "last_name")
-    ordering = ("email",)
+    ordering = ("email", "created_at", "updated_at")
     readonly_fields = ("created_at", "updated_at")
     filter_horizontal = ("groups",)
     list_filter = ("is_active", "is_staff", "is_superuser")
