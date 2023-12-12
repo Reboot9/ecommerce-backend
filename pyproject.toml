@@ -22,8 +22,8 @@ drf-yasg = "^1.21.7"
 # Set the maximum line length
 line-length = 99
 # exclude migrations folder from checking
-exclude = ["migrations"]
-ignore=["D106", "D200", "D212"]
+extend-exclude = ["migrations"]
+ignore = ["D106", "D200", "D212"]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["E402", "D104"]
@@ -33,9 +33,9 @@ ignore=["D106", "D200", "D212"]
 [tool.ruff.lint]
 # Add the `line-too-long` rule to the enforced rule set.
 extend-select = [
-  "E501",
-  "UP",  # pyupgrade
-  "D",   # pydocstyle
+    "E501",
+    "UP", # pyupgrade
+    "D", # pydocstyle
 ]
 
 [tool.ruff.lint.pydocstyle]
