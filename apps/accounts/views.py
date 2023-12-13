@@ -73,6 +73,7 @@ class DecoratedTokenRefreshView(jwt_views.TokenRefreshView):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
+                "access": schemas.access_token_schema,
                 "refresh": schemas.refresh_token_schema,
             },
             required=["refresh"],

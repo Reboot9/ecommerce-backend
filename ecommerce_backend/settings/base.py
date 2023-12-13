@@ -54,6 +54,7 @@ LOCAL_APPS = [
 THIRD_PARTY_APPS = [
     "rest_framework_simplejwt",
     "drf_yasg",
+    "rest_framework_simplejwt.token_blacklist",  # required to blacklist tokens after rotation
 ]
 
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + THIRD_PARTY_APPS
@@ -156,6 +157,6 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
     # TODO: Consider about implementing token rotation via celery and redis
     # Token rotation settings
-    # "ROTATE_REFRESH_TOKENS": True,
-    # "BLACKLIST_AFTER_ROTATION": True,
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
 }
