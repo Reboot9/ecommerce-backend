@@ -13,7 +13,7 @@ from apps.accounts import schemas
 from apps.accounts.models import CustomUser
 from apps.accounts.serializers.token import TokenRefreshResponseSerializer
 from apps.accounts.serializers.user import UserSerializer
-
+from apps.accounts.paginators import CustomUserPagination
 
 # TODO: consider about adding more Swagger things like tags
 #  and implement authentication in Swagger via JWT
@@ -182,9 +182,9 @@ class UserViewSet(viewsets.ModelViewSet):
     User management API.
     """
 
-    # TODO: add pagination
-    queryset = CustomUser.objects.all()
+    queryset = CustomUser.objects.filter(is_active=True)
     serializer_class = UserSerializer
+    pagination_class = CustomUserPagination
 
     @swagger_auto_schema(
         operation_description="Registration of new user",
