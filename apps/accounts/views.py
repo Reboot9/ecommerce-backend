@@ -111,11 +111,36 @@ class DecoratedTokenRefreshView(jwt_views.TokenRefreshView):
 @method_decorator(
     name="list",
     decorator=swagger_auto_schema(
-        operation_description="List all users",
+        operation_description="List all users with pagination",
+        manual_parameters=[
+            openapi.Parameter(
+                name="page",
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_INTEGER,
+                description="Page number",
+            ),
+            openapi.Parameter(
+                name="page_size",
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_INTEGER,
+                description="Number of items per page",
+            ),
+        ],
         responses={
             status.HTTP_200_OK: openapi.Response(
                 description="List of users",
-                schema=openapi.Schema(type=openapi.TYPE_ARRAY, items=schemas.user_response_schema),
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "count": openapi.Schema(type=openapi.TYPE_INTEGER),
+                        "next": openapi.Schema(type=openapi.TYPE_STRING),
+                        "previous": openapi.Schema(type=openapi.TYPE_STRING),
+                        "results": openapi.Schema(
+                            type=openapi.TYPE_ARRAY,
+                            items=schemas.user_response_schema,
+                        ),
+                    },
+                ),
             ),
         },
     ),
