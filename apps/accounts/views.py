@@ -210,8 +210,8 @@ class UserViewSet(viewsets.ModelViewSet):
                         "tokens": openapi.Schema(
                             type=openapi.TYPE_OBJECT,
                             properties={
-                                "refresh": schemas.refresh_token_schema,
                                 "access": schemas.access_token_schema,
+                                "refresh": schemas.refresh_token_schema,
                             },
                         ),
                     },
@@ -238,8 +238,8 @@ class UserViewSet(viewsets.ModelViewSet):
             # Add access and refresh tokens to response properties
             refresh = RefreshToken.for_user(user)
             tokens = {
-                "refresh": str(refresh),
                 "access": str(refresh.access_token),
+                "refresh": str(refresh),
             }
 
             return Response(
