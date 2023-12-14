@@ -25,11 +25,22 @@ class CustomUserCreationForm(UserCreationForm):
         label="Password Confirmation",
         strip=False,
         widget=forms.PasswordInput,
+        help_text="Enter the same password as before, for verification.",
+    )
+    is_superuser = forms.BooleanField(
+        label="Is Superuser",
+        required=False,
+        help_text="Check this box if the user should have superuser privileges.",
+    )
+    is_staff = forms.BooleanField(
+        label="Is Staff",
+        required=False,
+        help_text="Check this box if the user should have staff privileges.",
     )
 
     class Meta:
         model = CustomUser
-        fields: tuple = ("email", "password1", "password2")
+        fields: tuple = ("email", "password1", "password2", "is_superuser", "is_staff")
         field_classes: Dict[str, Type[forms.Field]] = {
             "email": forms.EmailField,
             "password1": forms.PasswordInput,

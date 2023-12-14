@@ -53,3 +53,18 @@ class UserSerializer(serializers.ModelSerializer):
             instance.set_password(password)
         instance.save()
         return instance
+
+    def update(self, instance: CustomUser, validated_data: Dict[str, Any]) -> CustomUser:
+        """
+        Update an existing model instance.
+
+        :param instance: The existing user instance to be updated.
+        :param validated_data: The validated data containing the fields to be updated.
+        :return: The updated user instance.
+        """
+        # Prevent modifying the email field after creation
+        if "email" in validated_data:
+            raise serializers.ValidationError("Email cannot be modified after creation.")
+
+        # Call the default update method for other fields
+        return super().update(instance, validated_data)
