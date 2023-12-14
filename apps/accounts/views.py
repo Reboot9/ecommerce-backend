@@ -1,3 +1,7 @@
+"""
+This module contains Django views related to user authentication and creation.
+"""
+from django.db.models import QuerySet
 from django.shortcuts import render  # noqa F401
 from django.utils.decorators import method_decorator
 from drf_yasg import openapi
@@ -14,6 +18,7 @@ from apps.accounts.models import CustomUser
 from apps.accounts.serializers.token import TokenRefreshResponseSerializer
 from apps.accounts.serializers.user import UserSerializer
 from apps.accounts.paginators import CustomUserPagination
+
 
 # TODO: consider about adding more Swagger things like tags
 #  and implement authentication in Swagger via JWT
@@ -190,26 +195,22 @@ class DecoratedTokenRefreshView(jwt_views.TokenRefreshView):
         },
     ),
 )
-@method_decorator(
-    name="destroy",
-    decorator=swagger_auto_schema(
-        operation_description="Delete user",
-        responses={
-            status.HTTP_204_NO_CONTENT: openapi.Response(description="User deleted successfully"),
-            status.HTTP_404_NOT_FOUND: openapi.Response(
-                description="User not found", schema=schemas.detail_schema
-            ),
-        },
-    ),
-)
 class UserViewSet(viewsets.ModelViewSet):
     """
     User management API.
     """
 
-    queryset = CustomUser.objects.filter(is_active=True)
     serializer_class = UserSerializer
     pagination_class = CustomUserPagination
+
+    def get_queryset(self) -> QuerySet[CustomUser]:
+        """
+        Retrieve the queryset for CustomUser instances.
+
+        :return: The queryset for CustomUser instances.
+        """
+        # Only include active users in the queryset
+        return CustomUser.objects.filter(is_active=True)
 
     @swagger_auto_schema(
         operation_description="Registration of new user",
@@ -252,10 +253,12 @@ class UserViewSet(viewsets.ModelViewSet):
         """
         Create a new user based on the provided request data.
 
-        Args:
-            request (Request): The HTTP request containing user data.
-            *args: Variable-length argument list.
-            **kwargs: Arbitrary keyword arguments.
+        :param request: The HTTP request containing user data.
+        :param args: Variable-length argument list.
+        :param kwargs: Arbitrary keyword arguments.
+        :return: Response object indicating the operation status. If successful, returns a
+        response with the newly created user data and associated access and refresh tokens.
+        If unsuccessful, returns a response with error details.
         """
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
@@ -273,3 +276,28 @@ class UserViewSet(viewsets.ModelViewSet):
             )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @swagger_auto_schema(
+        operation_description="Delete user",
+        responses={
+            status.HTTP_204_NO_CONTENT: openapi.Response(description="User deleted successfully"),
+            status.HTTP_404_NOT_FOUND: openapi.Response(
+                description="User not found", schema=schemas.detail_schema
+            ),
+        },
+    )
+    def destroy(self, request, *args, **kwargs):
+        """
+        Soft delete of user instance by setting is_active to False.
+
+        :param request: The HTTP request object.
+        :param args: Variable length argument list.
+        :param kwargs: Arbitrary keyword arguments.
+        :return: Response object with a status of 204 (No content)
+         indicating successful deletion
+        """
+        instance = self.get_object()
+        instance.is_active = False
+        instance.save()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
