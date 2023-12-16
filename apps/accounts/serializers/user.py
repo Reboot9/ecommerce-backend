@@ -13,8 +13,14 @@ class UserSerializer(serializers.ModelSerializer):
     Serializer for the User model, handling user registration.
     """
 
-    password = serializers.CharField(max_length=128, min_length=8, write_only=True)
-    password2 = serializers.CharField(max_length=128, min_length=8, write_only=True)
+    password = serializers.CharField(
+        max_length=128, min_length=8, style={"input_type": "password"}, write_only=True
+    )
+    password2 = serializers.CharField(
+        max_length=128, min_length=8, style={"input_type": "password"}, write_only=True
+    )
+    createdAt = serializers.DateTimeField(source="created_at", read_only=True)
+    updatedAt = serializers.DateTimeField(source="updated_at", read_only=True)
 
     class Meta:
         model = CustomUser
@@ -23,7 +29,30 @@ class UserSerializer(serializers.ModelSerializer):
             "email",
             "password",
             "password2",
+            "createdAt",
+            "updatedAt",
         )
+
+    def get_fields(self) -> Dict[str, Any]:
+        """
+        Override the get_fields method to customize field behavior based on the HTTP method.
+
+        During update operations (PATCH or PUT), exclude the email and password fields from the
+        serialized output and do not expect them in the incoming data.
+
+        :return: A dictionary of field names and their corresponding serializer instances.
+
+        """
+        fields = super().get_fields()
+        request_method = self.context["request"].method if "request" in self.context else None
+
+        # Remove email and password fields during update operation
+        if request_method == "PATCH" or request_method == "PUT":
+            fields.pop("email", None)
+            fields.pop("password", None)
+            fields.pop("password2", None)
+
+        return fields
 
     def validate(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """

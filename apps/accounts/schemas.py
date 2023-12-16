@@ -23,6 +23,14 @@ email_schema = openapi.Schema(
     max_length=255,
 )
 
+created_at_schema = openapi.Schema(
+    title="Created at", type=openapi.TYPE_STRING, format="date-time"
+)
+
+updated_at_schema = openapi.Schema(
+    title="Updated at", type=openapi.TYPE_STRING, format="date-time"
+)
+
 password_schema = openapi.Schema(
     type=openapi.TYPE_STRING,
     format="password",
@@ -41,6 +49,8 @@ user_response_schema = openapi.Schema(
     properties={
         "id": openapi.Schema(type=openapi.TYPE_NUMBER, description="Unique user identifier."),
         "email": email_schema,
+        "createdAt": created_at_schema,
+        "updatedAt": updated_at_schema,
         # Add other properties as needed
     },
 )
