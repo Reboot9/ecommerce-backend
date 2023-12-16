@@ -21,16 +21,13 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include, re_path
 from rest_framework import permissions
-from rest_framework.routers import DefaultRouter
-from apps.accounts import views
 
-# Rest framework routers
-router = DefaultRouter()
-router.register(r"users", views.UserViewSet, basename="user")
+from apps.accounts import views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("api/", include(router.urls)),
+    # app endpoints
+    path("api/", include("apps.accounts.urls", namespace="accounts")),
     # JWT token endpoints
     path("api/token/", views.DecoratedTokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/token/refresh/", views.DecoratedTokenRefreshView.as_view(), name="token_refresh"),
