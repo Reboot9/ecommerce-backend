@@ -1,6 +1,7 @@
 """
 Contains serializers for user-related models and registration logic.
 """
+import re
 from typing import Dict, Any
 
 from rest_framework import serializers
@@ -69,6 +70,20 @@ class UserSerializer(serializers.ModelSerializer):
                     "password2": "Passwords do not match.",
                 }
             )
+
+        # Validate the password format
+        password = data.get("password")
+        if password:
+            if not re.match("^[a-zA-Z0-9@#$%^&+=]+$", password):
+                raise serializers.ValidationError(
+                    {
+                        "password": "Password must contain only latin letters,"
+                        " numbers, and special characters (@#$%^&+=).",
+                        "password2": "Password must contain only latin letters,"
+                        " numbers, and special characters (@#$%^&+=).",
+                    }
+                )
+
         return data
 
     def create(self, validated_data: Dict[str, Any]) -> CustomUser:
