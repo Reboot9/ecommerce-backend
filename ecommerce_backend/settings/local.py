@@ -5,6 +5,10 @@ import socket
 DEBUG = True
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
+if DEBUG:
+    INSTALLED_APPS += [
+        "debug_toolbar",
+    ]
 
 # this is required for django debug toolbar to work with Docker
 hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())

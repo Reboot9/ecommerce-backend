@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """  # noqa: D212
 
 import os
+from datetime import timedelta
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -42,14 +43,19 @@ DJANGO_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    "debug_toolbar",
 ]
 
 # Specific apps for the project
-LOCAL_APPS = ["apps.accounts.apps.AccountsConfig"]
+LOCAL_APPS = [
+    "apps.accounts.apps.AccountsConfig",
+]
 
 # External packages or libraries integrated into project.
-THIRD_PARTY_APPS = []
+THIRD_PARTY_APPS = [
+    "rest_framework_simplejwt",
+    "drf_yasg",
+    "rest_framework_simplejwt.token_blacklist",  # required to blacklist tokens after rotation
+]
 
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + THIRD_PARTY_APPS
 
@@ -137,3 +143,20 @@ MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "accounts.CustomUser"
+
+# DRF settings
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ]
+}
+
+# Simple JWT settings
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
+    # TODO: Consider about implementing token rotation via celery and redis
+    # Token rotation settings
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+}

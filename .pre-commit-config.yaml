@@ -6,6 +6,7 @@ repos:
       - id: check-yaml
       # Append newline characters to files without them
       - id: end-of-file-fixer
+        files: ^((?!migrations/).)*\.py$
       # Remove trailing whitespace at the end of lines
       - id: trailing-whitespace
 
