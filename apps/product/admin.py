@@ -8,7 +8,7 @@ from django.contrib import admin
 from django.contrib import messages
 from django.utils.translation import ngettext
 
-from apps.product.models import Manufacturer, Category
+from apps.product.models import Manufacturer, Category, Image
 from apps.product.models.product import ProductCharacteristics, TypeProductCharacteristics, Product
 
 
@@ -24,6 +24,13 @@ class ProductCharacteristicsInline(admin.TabularInline):
 
     model = ProductCharacteristics.product.through
     extra = 1
+
+
+class ImageInline(admin.TabularInline):
+    """Inline admin class for Image related to Product."""
+
+    model = Image
+    extra = 2
 
 
 class ProductAdmin(admin.ModelAdmin):
@@ -57,8 +64,8 @@ class ProductAdmin(admin.ModelAdmin):
     list_filter = ("stock", "discount_percentage")
     list_editable = ("price", "discount_percentage", "stock")
     prepopulated_fields = {"slug": ("name", "product_code")}
-    actions = "remove_discount"
-    inlines = (TypeProductCharacteristicsInline, ProductCharacteristicsInline)
+    actions = ("remove_discount",)
+    inlines = (ImageInline, TypeProductCharacteristicsInline, ProductCharacteristicsInline)
 
 
 class ProductCharacteristicsAdmin(admin.ModelAdmin):
@@ -71,7 +78,7 @@ class ProductCharacteristicsAdmin(admin.ModelAdmin):
 class TypeProductCharacteristicsAdmin(admin.ModelAdmin):
     """Admin class for TypeProductCharacteristics model."""
 
-    list_display = ("type_characteristic",)
+    list_display = ("type_characteristic", "product_characteristics")
     search_fields = ("type_characteristic",)
     filter_horizontal = ("product",)
 
@@ -99,3 +106,4 @@ admin.site.register(ProductCharacteristics, ProductCharacteristicsAdmin)
 admin.site.register(TypeProductCharacteristics, TypeProductCharacteristicsAdmin)
 admin.site.register(Manufacturer, ManufacturerAdmin)
 admin.site.register(Category, CategoryAdmin)
+admin.site.register(Image, ImageAdmin)

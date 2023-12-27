@@ -37,7 +37,7 @@ class Product(BaseID, BaseDate):
         null=True,
         blank=True,
     )
-    discount_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    discount_percentage = models.DecimalField(max_digits=4, decimal_places=2, default=0)
     price = models.DecimalField(
         verbose_name=_("Price"),
         max_digits=10,
