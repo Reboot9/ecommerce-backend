@@ -43,6 +43,7 @@ DJANGO_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "django_filters",
 ]
 
 # Specific apps for the project
@@ -55,7 +56,6 @@ LOCAL_APPS = [
 THIRD_PARTY_APPS = [
     "rest_framework_simplejwt",
     "drf_yasg",
-    "rest_framework_simplejwt.token_blacklist",  # required to blacklist tokens after rotation
 ]
 
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + THIRD_PARTY_APPS
@@ -147,9 +147,12 @@ AUTH_USER_MODEL = "accounts.CustomUser"
 
 # DRF settings
 REST_FRAMEWORK = {
+    "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-    ]
+    ],
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 2,
 }
 
 # Simple JWT settings
@@ -158,6 +161,6 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
     # TODO: Consider about implementing token rotation via celery and redis
     # Token rotation settings
-    "ROTATE_REFRESH_TOKENS": True,
-    "BLACKLIST_AFTER_ROTATION": True,
+    # "ROTATE_REFRESH_TOKENS": True,
+    # "BLACKLIST_AFTER_ROTATION": True,
 }

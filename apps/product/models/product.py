@@ -37,7 +37,7 @@ class Product(BaseID, BaseDate):
         null=True,
         blank=True,
     )
-    discount_percentage = models.DecimalField(max_digits=4, decimal_places=2, default=0)
+    discount_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     price = models.DecimalField(
         verbose_name=_("Price"),
         max_digits=10,
@@ -45,7 +45,7 @@ class Product(BaseID, BaseDate):
         null=True,
         blank=True,
     )
-    product_code = models.PositiveIntegerField(verbose_name=_("Product code"), unique=True)
+    product_code = models.CharField(max_length=256, verbose_name=_("Product code"), unique=True)
     stock = models.CharField(
         verbose_name=_("Stock"),
         max_length=1,
@@ -79,6 +79,11 @@ class Product(BaseID, BaseDate):
                 name="price_is_positive",
                 check=Q(price__gte=0) | Q(price__isnull=True),
                 violation_error_message=_("Price must be positive or empty."),
+            ),
+            models.CheckConstraint(
+                name="discount_percentage_is_positive",
+                check=Q(discount_percentage__gte=0),
+                violation_error_message=_("Discount percentage must be positive or 0."),
             ),
         ]
 

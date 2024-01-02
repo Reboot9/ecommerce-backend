@@ -50,7 +50,7 @@ class ProductAdmin(admin.ModelAdmin):
         )
 
     list_display = (
-        "id",
+        "slug",
         "name",
         "price",
         "stock",
@@ -65,7 +65,7 @@ class ProductAdmin(admin.ModelAdmin):
     list_editable = ("price", "discount_percentage", "stock")
     prepopulated_fields = {"slug": ("name", "product_code")}
     actions = ("remove_discount",)
-    inlines = (ImageInline, TypeProductCharacteristicsInline, ProductCharacteristicsInline)
+    inlines = (TypeProductCharacteristicsInline, ProductCharacteristicsInline)
 
 
 class ProductCharacteristicsAdmin(admin.ModelAdmin):
@@ -78,7 +78,7 @@ class ProductCharacteristicsAdmin(admin.ModelAdmin):
 class TypeProductCharacteristicsAdmin(admin.ModelAdmin):
     """Admin class for TypeProductCharacteristics model."""
 
-    list_display = ("type_characteristic", "product_characteristics")
+    list_display = ("type_characteristic",)
     search_fields = ("type_characteristic",)
     filter_horizontal = ("product",)
 
@@ -92,7 +92,10 @@ class ManufacturerAdmin(admin.ModelAdmin):
 class CategoryAdmin(admin.ModelAdmin):
     """Admin class for Category model."""
 
-    list_display = ("name",)
+    list_display = (
+        "id",
+        "name",
+    )
 
 
 class ImageAdmin(admin.ModelAdmin):

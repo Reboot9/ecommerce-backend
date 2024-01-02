@@ -32,7 +32,7 @@ class ProductListSerializer(BaseDateSerializer, serializers.ModelSerializer):
     priceDiscount = serializers.DecimalField(
         source="price_discount", max_digits=10, decimal_places=2, read_only=True
     )
-    productCode = serializers.IntegerField(source="product_code")
+    productCode = serializers.CharField(source="product_code")
     descriptionShort = serializers.CharField(source="description_short", max_length=256)
     discountPercentage = serializers.DecimalField(
         source="discount_percentage", max_digits=4, decimal_places=2

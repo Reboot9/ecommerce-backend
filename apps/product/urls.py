@@ -4,16 +4,15 @@ Module: urls.py.
 This module contains urls for the product app.
 """
 
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
+from django.urls import path
 
-from apps.product.views.product import ProductSet
-
-product_router = DefaultRouter()
-product_router.register(prefix="products", viewset=ProductSet, basename="product")
+from apps.product.views.manufacturer import ManufacturerList
+from apps.product.views.product import ProductList, ProductDetail
 
 app_name = "product"
 
 urlpatterns = [
-    path("", include(product_router.urls)),
+    path("products/", ManufacturerList.as_view(), name="manufacturer-list"),
+    path("product/<uuid:categories>/", ProductList.as_view(), name="product-list-categories"),
+    path("product/<uuid:categories>/<slug:slug>/", ProductDetail.as_view(), name="product-detail"),
 ]
