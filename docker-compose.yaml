@@ -27,8 +27,8 @@ services:
       - .:/ecommerce_backend
       - static_volume:/ecommerce_backend/static
       - media_volume:/ecommerce_backend/media
-    ports:
-      - "8000:8000"
+    expose:
+      - 8000
     networks:
       - ecommerce_network
     depends_on:
@@ -44,6 +44,8 @@ services:
       - media_volume:/ecommerce_backend/media
     ports:
       - "80:80"
+    networks:
+      - ecommerce_network
     depends_on:
       - web
 
