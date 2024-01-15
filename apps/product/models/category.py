@@ -1,6 +1,7 @@
 """
 Module defines Category model for product app.
 """
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -10,12 +11,30 @@ from apps.base.models import BaseDate, BaseID
 class Category(BaseID, BaseDate):
     """Represents a product category in the ecommerce system."""
 
+    LEVEL_CHOICES = [
+        (0, _("Top Level")),
+        (1, _("Medium Level")),
+        (2, _("Lower Level")),
+    ]
+
     name = models.CharField(max_length=256, verbose_name=_("Name"), db_index=True)
     slug = models.SlugField(max_length=256, unique=True)
     parent = models.ForeignKey(
         "self", on_delete=models.CASCADE, null=True, blank=True, related_name="subcategories"
     )
-    level = models.PositiveSmallIntegerField(default=0)
+    level = models.PositiveSmallIntegerField(
+        choices=LEVEL_CHOICES,
+        default=0,
+        verbose_name=_(
+            "Category Level",
+        ),
+        help_text=_(
+            "Select the level of this category. "
+            "Top Level is for main categories, "
+            "Medium Level for subcategories, "
+            "and Lower Level for the most specific categories."
+        ),
+    )
 
     class Meta:
         db_table = "category"
@@ -30,6 +49,24 @@ class Category(BaseID, BaseDate):
         :return: The name of category.
         """
         return self.name
+
+    def clean(self) -> None:
+        """
+        Override default method to enforce custom validation rules.
+        """
+        super().clean()
+
+        if self.level in [1, 2] and not self.parent_id:
+            raise ValidationError(
+                {"parent": 'Categories with level "Medium" and "Lower" need to have a parent.'}
+            )
+
+        if self.parent_id and (self.level <= self.parent.level):
+            # Despite checking that level <= parent.level, the error message mentions category
+            # level must be lower than its parent's level.
+            raise ValidationError(
+                {"parent": "Category level must be lower than its parent's category level."}
+            )
 
     def get_ancestors(self) -> list:
         """
