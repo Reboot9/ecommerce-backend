@@ -52,21 +52,18 @@ class Product(BaseID, BaseDate):
         choices=ProductStockChoices.choices,
         default=ProductStockChoices.IN_STOCK,
     )
-
     manufacturer = models.ForeignKey(
         to=Manufacturer,
         on_delete=models.CASCADE,
         related_name="products",
         verbose_name=_("Manufacturer"),
     )
-
     categories = models.ForeignKey(
         to=Category,
         on_delete=models.CASCADE,
         related_name="product_categories",
         verbose_name=_("Categories"),
     )
-
     image = models.ImageField(upload_to="product/%Y/%m/%d", verbose_name=_("Image path"))
 
     class Meta:
@@ -108,9 +105,12 @@ class Product(BaseID, BaseDate):
 
 
 class ProductCharacteristics(BaseID, BaseDate):
-    """Model representing a product characteristic."""
+    """Model representing a product characteristic.
 
-    product_charactetistic = models.CharField(
+    For example: weight, feed class.
+    """
+
+    product_characteristic = models.CharField(
         max_length=256, verbose_name=_("Product characteristics"), unique=True
     )
     categories = models.ManyToManyField(
@@ -121,7 +121,7 @@ class ProductCharacteristics(BaseID, BaseDate):
     )
     product = models.ManyToManyField(
         to=Product,
-        db_table=" product characteristic m2m",
+        db_table="product characteristic m2m",
         related_name="product_characteristics",
         blank=True,
     )
@@ -136,11 +136,15 @@ class ProductCharacteristics(BaseID, BaseDate):
 
         Or when the object needs to be represented as a string
         """
-        return f"{self.product_charactetistic}"
+        return f"{self.product_characteristic}"
 
 
 class TypeProductCharacteristics(BaseID, BaseDate):
-    """Model representing a type of product characteristic."""
+    """Model representing a type of product characteristic.
+
+    For example: premium, 1.5kg
+    feed class - premium, weight - 1.5kg.
+    """
 
     type_characteristic = models.CharField(
         max_length=256, verbose_name=_("Type of product characteristics"), unique=True
@@ -160,6 +164,6 @@ class TypeProductCharacteristics(BaseID, BaseDate):
     def __str__(self) -> str:
         """This method is automatically called when you use the `str()` function.
 
-        Or when the object needs to be represented as a string
+        Or when the object needs to be represented as a string.
         """
         return f"{self.type_characteristic}"

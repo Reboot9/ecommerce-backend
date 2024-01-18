@@ -13,6 +13,10 @@ app_name = "product"
 
 urlpatterns = [
     path("products/", ManufacturerList.as_view(), name="manufacturer-list"),
-    path("product/<uuid:categories>/", ProductList.as_view(), name="product-list-categories"),
-    path("product/<uuid:categories>/<slug:slug>/", ProductDetail.as_view(), name="product-detail"),
+    path("products/<uuid:categories>/", ProductList.as_view(), name="product-list-categories"),
+    path(
+        "products/<uuid:categories>/<slug:product_slug>/",
+        ProductDetail.as_view(),
+        name="product-detail",
+    ),
 ]
