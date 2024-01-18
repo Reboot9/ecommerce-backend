@@ -17,6 +17,8 @@ class TypeProductCharacteristicsInline(admin.TabularInline):
 
     model = TypeProductCharacteristics.product.through
     extra = 1
+    verbose_name = "Type of product characteristic"
+    verbose_name_plural = "Type of product characteristics"
 
 
 class ProductCharacteristicsInline(admin.TabularInline):
@@ -24,6 +26,8 @@ class ProductCharacteristicsInline(admin.TabularInline):
 
     model = ProductCharacteristics.product.through
     extra = 1
+    verbose_name = "Product Characteristic"
+    verbose_name_plural = "Product Characteristics"
 
 
 class ImageInline(admin.TabularInline):
@@ -31,6 +35,8 @@ class ImageInline(admin.TabularInline):
 
     model = Image
     extra = 2
+    verbose_name = "Additional image"
+    verbose_name_plural = "Additional images"
 
 
 class ProductAdmin(admin.ModelAdmin):
@@ -59,34 +65,70 @@ class ProductAdmin(admin.ModelAdmin):
         "discount_percentage",
         "price_discount",
         "created_at",
+        "updated_at",
     )
-    search_fields = ("name", "product_code")
-    list_filter = ("stock", "discount_percentage")
+    list_select_related = ("manufacturer", "categories")
+    readonly_fields = ("created_at", "updated_at")
+    search_fields = (
+        "name",
+        "product_code",
+        "slug",
+        "manufacturer__trade_brand",
+        "categories__name",
+    )
+    list_filter = ("stock", "discount_percentage", "created_at", "updated_at")
     list_editable = ("price", "discount_percentage", "stock")
     prepopulated_fields = {"slug": ("name", "product_code")}
     actions = ("remove_discount",)
-    inlines = (TypeProductCharacteristicsInline, ProductCharacteristicsInline)
+    inlines = (
+        ProductCharacteristicsInline,
+        TypeProductCharacteristicsInline,
+        ImageInline,
+    )  # inline will change
+    list_per_page = 10
+    list_max_show_all = 100
 
 
 class ProductCharacteristicsAdmin(admin.ModelAdmin):
     """Admin class for ProductCharacteristics model."""
 
-    List_display = ("product_charactetistic", "categories")
+    list_display = ("product_characteristic", "created_at", "updated_at")
+    readonly_fields = ("created_at", "updated_at")
+    search_fields = ("product_characteristic",)
+    list_filter = ("created_at", "updated_at")
     filter_horizontal = ("product",)
+    list_per_page = 10
+    list_max_show_all = 100
 
 
 class TypeProductCharacteristicsAdmin(admin.ModelAdmin):
     """Admin class for TypeProductCharacteristics model."""
 
-    list_display = ("type_characteristic",)
+    list_display = ("type_characteristic", "product_characteristics", "created_at", "updated_at")
+    list_select_related = ("product_characteristics",)
+    readonly_fields = ("created_at", "updated_at")
     search_fields = ("type_characteristic",)
+    list_filter = ("created_at", "updated_at")
     filter_horizontal = ("product",)
+    list_per_page = 10
+    list_max_show_all = 100
 
 
 class ManufacturerAdmin(admin.ModelAdmin):
     """Admin class for Manufacturer mode."""
 
-    list_display = ("trade_brand",)
+    list_display = (
+        "trade_brand",
+        "country",
+        "country_brand_registration",
+        "created_at",
+        "updated_at",
+    )
+    readonly_fields = ("created_at", "updated_at")
+    search_fields = ("trade_brand", "country")
+    list_filter = ("created_at", "updated_at")
+    list_per_page = 10
+    list_max_show_all = 100
 
 
 class CategoryAdmin(admin.ModelAdmin):
@@ -101,7 +143,12 @@ class CategoryAdmin(admin.ModelAdmin):
 class ImageAdmin(admin.ModelAdmin):
     """Admin class for Image model."""
 
-    list_display = ("image",)
+    list_display = ("image", "product", "created_at", "updated_at")
+    readonly_fields = ("created_at", "updated_at")
+    search_fields = ("product__name",)
+    list_filter = ("created_at", "updated_at")
+    list_per_page = 10
+    list_max_show_all = 100
 
 
 admin.site.register(Product, ProductAdmin)
