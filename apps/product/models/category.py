@@ -1,6 +1,8 @@
 """
 Module defines Category model for product app.
 """
+from typing import Type, List
+
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -106,3 +108,20 @@ class Category(BaseID, BaseDate):
             descendants.extend(descendant.get_descendants())
 
         return descendants
+
+    @classmethod
+    def get_descendants_by_level(
+        cls: Type["Category"], slug: str, *, level: int
+    ) -> List["Category"]:
+        """
+        Retrieve descendants of a category with a specified level.
+
+        :param slug: slug of parent category.
+        :param level: desired level of descendants (0 for top-level, 1 for medium, 2 for lower).
+        :return: A QuerySet containing the descendants of the specified category at
+         the specified level.
+         An empty QuerySet is returned if the level is not in the range [0, 2].
+        """
+        if level in {i for i in range(3)}:
+            return cls.objects.filter(parent__slug=slug, level=level)
+        return cls.objects.none()
