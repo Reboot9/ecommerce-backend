@@ -3,13 +3,14 @@ Module: views.py.
 
 This module contains handler for the product app.
 """
+from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 
 from apps.base.pagination import PaginationCommon
 from apps.product.filters.product import ProductFilter
-from apps.product.models import Product
+from apps.product.models import Product, Category
 from apps.product.serializers.product import ProductListSerializer, ProductDetailSerializer
 
 
@@ -38,10 +39,12 @@ class ProductList(ListAPIView):
 
     def get_queryset(self):
         """Different filters require different sets of queries."""
+        categories_slug = self.kwargs.get("lower_category_slug")
+        category = get_object_or_404(Category, slug=categories_slug)
         return (
             Product.objects.prefetch_related("product_characteristics", "types_product", "images")
             .select_related("manufacturer", "categories")
-            .filter(categories=self.kwargs["categories"])
+            .filter(categories=category)
         )
 
 
