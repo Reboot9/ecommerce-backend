@@ -39,12 +39,17 @@ class ProductList(ListAPIView):
 
     def get_queryset(self):
         """Different filters require different sets of queries."""
-        categories_slug = self.kwargs.get("lower_category_slug")
-        category = get_object_or_404(Category, slug=categories_slug)
+        category_slug = self.kwargs.get("category_slug")
+        subcategory_slug = self.kwargs.get("subcategory_slug")
+        lower_category_slug = self.kwargs.get("lower_category_slug")
+
+        category = get_object_or_404(Category, slug=category_slug)
+        subcategory = get_object_or_404(Category, parent=category, slug=subcategory_slug)
+        lower_category = get_object_or_404(Category, parent=subcategory, slug=lower_category_slug)
         return (
             Product.objects.prefetch_related("product_characteristics", "types_product", "images")
             .select_related("manufacturer", "categories")
-            .filter(categories=category)
+            .filter(categories=lower_category)
         )
 
 
