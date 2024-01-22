@@ -58,11 +58,13 @@ class ProductDetail(RetrieveAPIView):
 
     serializer_class = ProductDetailSerializer
     lookup_field = "slug"
+    lookup_url_kwarg = "product_slug"
 
     def get_queryset(self):
         """Filters the queryset based on the product's unique slug."""
+        product_slug = self.kwargs.get("product_slug")
         return (
             Product.objects.prefetch_related("product_characteristics", "types_product", "images")
             .select_related("manufacturer", "categories")
-            .filter(slug=self.kwargs["slug"])
+            .filter(slug=product_slug)
         )
