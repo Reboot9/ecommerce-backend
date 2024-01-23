@@ -44,6 +44,7 @@ class Product(BaseID, BaseDate):
         decimal_places=2,
         null=True,
         blank=True,
+        help_text=_("This field allows empty value"),
     )
     product_code = models.CharField(max_length=256, verbose_name=_("Product code"), unique=True)
     stock = models.CharField(

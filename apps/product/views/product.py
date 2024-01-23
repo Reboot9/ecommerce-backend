@@ -3,6 +3,7 @@ Module: views.py.
 
 This module contains handler for the product app.
 """
+from django.db.models import QuerySet
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.generics import ListAPIView, RetrieveAPIView
@@ -36,7 +37,7 @@ class ProductList(ListAPIView):
     search_fields = ["name", "manufacturer__trade_brand", "product_code"]
     pagination_class = PaginationCommon
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet[Product]:
         """Different filters require different sets of queries."""
         return (
             Product.objects.prefetch_related("product_characteristics", "types_product", "images")
@@ -50,11 +51,12 @@ class ProductDetail(RetrieveAPIView):
 
     serializer_class = ProductDetailSerializer
     lookup_field = "slug"
+    lookup_url_kwarg = "product_slug"
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet[Product]:
         """Filters the queryset based on the product's unique slug."""
         return (
             Product.objects.prefetch_related("product_characteristics", "types_product", "images")
             .select_related("manufacturer", "categories")
-            .filter(slug=self.kwargs["slug"])
+            .filter(slug=self.kwargs["product_slug"])
         )
