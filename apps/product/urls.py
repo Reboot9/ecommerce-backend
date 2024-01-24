@@ -8,7 +8,7 @@ from django.urls import path
 
 from apps.product.views.manufacturer import ManufacturerList
 from apps.product.views.product import ProductList, ProductDetail
-from apps.product.views.category import CategoryListView
+from apps.product.views.category import CategoryDetailView
 
 app_name = "product"
 
@@ -20,18 +20,26 @@ urlpatterns = [
         ProductDetail.as_view(),
         name="product-detail",
     ),
-    path("shop/", CategoryListView.as_view(), name="top-categories-list"),
+    path("shop/", CategoryDetailView.as_view(), name="top-categories-list"),
     path(
-        "shop/<slug:category_slug>/", CategoryListView.as_view(), name="category-descendants-list"
+        "shop/<slug:category_slug>/",
+        CategoryDetailView.as_view(),
+        name="category-descendants-list",
     ),
     path(
         "shop/<slug:category_slug>/<slug:subcategory_slug>/",
-        CategoryListView.as_view(),
+        CategoryDetailView.as_view(),
         name="subcategory-descendants-list",
     ),
     path(
         "shop/<slug:category_slug>/<slug:subcategory_slug>/<slug:lower_category_slug>/",
         ProductList.as_view(),
         name="product-list-by-category",
+    ),
+    path(
+        "shop/<slug:category_slug>/<slug:subcategory_slug>/<slug:lower_category_slug>"
+        "/<slug:product_slug>/",
+        ProductDetail.as_view(),
+        name="product-detail-by-category",
     ),
 ]

@@ -10,17 +10,17 @@ from apps.product.models import Category
 from apps.product.serializers.category import CategorySerializer
 
 
-class CategoryListView(generics.ListAPIView):
+class CategoryDetailView(generics.RetrieveAPIView):
     """
-    API View for retrieving list of categories.
+    API View for retrieving single category with its descendants.
     """
 
     serializer_class = CategorySerializer
     pagination_class = PageNumberPagination
 
-    def get_queryset(self):
+    def get_object(self):
         """
-        Retrieving categories and subcategories based on the provided slugs.
+        Retrieving descendant categories based on the provided slugs.
 
         :return: queryset containing descendant categories
         """
@@ -28,22 +28,24 @@ class CategoryListView(generics.ListAPIView):
         subcategory_slug = self.kwargs.get("subcategory_slug")
 
         if category_slug:
-            category = get_object_or_404(Category, slug=category_slug)
+            parent_category = get_object_or_404(Category, slug=category_slug)
 
             if subcategory_slug:
-                subcategory = get_object_or_404(Category, parent=category, slug=subcategory_slug)
-                return subcategory.subcategories.all()
+                descendant_category = get_object_or_404(
+                    Category, parent=parent_category, slug=subcategory_slug
+                )
+                return descendant_category.subcategories.all()
             else:
-                return category.subcategories.all()
+                return parent_category.subcategories.all()
         else:
             # If no category slug is provided, return top-level categories
             return Category.objects.filter(level=0)
 
-    def list(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         """
-        List view for retrieving a category and its descendants.
+        Get view for retrieving a category and its descendants.
 
-        Retrieves the queryset, serializes it, and includes information about the requested
+        Retrieves the object, serializes it, and includes information about the requested
         category and its descendants in the response.
 
         :param request: The HTTP request.
@@ -53,21 +55,23 @@ class CategoryListView(generics.ListAPIView):
         category and its descendants.
         If the category or its descendants are not found, returns an appropriate HTTP 404 response.
         """
-        queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset, many=True)
+        children_categories = self.get_object()
+        serializer = self.get_serializer(children_categories, many=True)
 
         category_slug = self.kwargs.get("category_slug")
         subcategory_slug = self.kwargs.get("subcategory_slug")
 
-        category = None
+        requested_category = None
 
         if subcategory_slug:
-            category = get_object_or_404(Category, slug=subcategory_slug)
+            requested_category = get_object_or_404(Category, slug=subcategory_slug)
         elif category_slug:
-            category = get_object_or_404(Category, slug=category_slug)
+            requested_category = get_object_or_404(Category, slug=category_slug)
 
         response_data = {
-            "category": CategorySerializer(category).data if category else None,
+            "category": CategorySerializer(requested_category).data
+            if requested_category
+            else None,
             "descendants": serializer.data,
         }
 
