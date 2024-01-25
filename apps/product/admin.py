@@ -76,6 +76,11 @@ class ProductAdmin(admin.ModelAdmin):
         "manufacturer__trade_brand",
         "categories__name",
     )
+    search_help_text = (
+        "In this field you can search by such fields: name,"
+        " product code, slug, manufacturer, categories"
+    )
+    autocomplete_fields = ("manufacturer", "categories")
     list_filter = ("stock", "discount_percentage", "created_at", "updated_at")
     list_editable = ("price", "discount_percentage", "stock")
     prepopulated_fields = {"slug": ("name", "product_code")}
@@ -95,8 +100,9 @@ class ProductCharacteristicsAdmin(admin.ModelAdmin):
     list_display = ("product_characteristic", "created_at", "updated_at")
     readonly_fields = ("created_at", "updated_at")
     search_fields = ("product_characteristic",)
+    search_help_text = "In this field you can search by such fields: product characteristic"
     list_filter = ("created_at", "updated_at")
-    filter_horizontal = ("product",)
+    filter_horizontal = ("product", "categories")
     list_per_page = 10
     list_max_show_all = 100
 
@@ -108,10 +114,12 @@ class TypeProductCharacteristicsAdmin(admin.ModelAdmin):
     list_select_related = ("product_characteristics",)
     readonly_fields = ("created_at", "updated_at")
     search_fields = ("type_characteristic",)
+    search_help_text = "In this field you can search by such fields: type characteristic"
     list_filter = ("created_at", "updated_at")
     filter_horizontal = ("product",)
     list_per_page = 10
     list_max_show_all = 100
+    autocomplete_fields = ("product_characteristics",)
 
 
 class ManufacturerAdmin(admin.ModelAdmin):
@@ -126,6 +134,7 @@ class ManufacturerAdmin(admin.ModelAdmin):
     )
     readonly_fields = ("created_at", "updated_at")
     search_fields = ("trade_brand", "country")
+    search_help_text = "In this field you can search by such fields: trade brand, country"
     list_filter = ("created_at", "updated_at")
     list_per_page = 10
     list_max_show_all = 100
@@ -138,6 +147,7 @@ class CategoryAdmin(admin.ModelAdmin):
         "id",
         "name",
     )
+    search_fields = ("name",)
 
 
 class ImageAdmin(admin.ModelAdmin):
@@ -146,9 +156,11 @@ class ImageAdmin(admin.ModelAdmin):
     list_display = ("image", "product", "created_at", "updated_at")
     readonly_fields = ("created_at", "updated_at")
     search_fields = ("product__name",)
+    search_help_text = "In this field you can search by such fields: product name"
     list_filter = ("created_at", "updated_at")
     list_per_page = 10
     list_max_show_all = 100
+    autocomplete_fields = ("product",)
 
 
 admin.site.register(Product, ProductAdmin)
