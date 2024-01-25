@@ -3,18 +3,18 @@ Module: views.py.
 
 This module contains handler for the product app.
 """
-from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 
 from apps.base.pagination import PaginationCommon
 from apps.product.filters.product import ProductFilter
-from apps.product.models import Product, Category
+from apps.product.mixins.category import CategoryMixin
+from apps.product.models import Product
 from apps.product.serializers.product import ProductListSerializer, ProductDetailSerializer
 
 
-class ProductList(ListAPIView):
+class ProductList(CategoryMixin, ListAPIView):
     """
     Returns a list of products, filtered by categories.
 
@@ -39,13 +39,7 @@ class ProductList(ListAPIView):
 
     def get_queryset(self):
         """Different filters require different sets of queries."""
-        category_slug = self.kwargs.get("category_slug")
-        subcategory_slug = self.kwargs.get("subcategory_slug")
-        lower_category_slug = self.kwargs.get("lower_category_slug")
-
-        category = get_object_or_404(Category, slug=category_slug)
-        subcategory = get_object_or_404(Category, parent=category, slug=subcategory_slug)
-        lower_category = get_object_or_404(Category, parent=subcategory, slug=lower_category_slug)
+        category, subcategory, lower_category = self.get_categories()
         return (
             Product.objects.prefetch_related("product_characteristics", "types_product", "images")
             .select_related("manufacturer", "categories")
@@ -53,7 +47,7 @@ class ProductList(ListAPIView):
         )
 
 
-class ProductDetail(RetrieveAPIView):
+class ProductDetail(CategoryMixin, RetrieveAPIView):
     """Returns one product."""
 
     serializer_class = ProductDetailSerializer
@@ -62,13 +56,7 @@ class ProductDetail(RetrieveAPIView):
 
     def get_queryset(self):
         """Filters the queryset based on the product's unique slug."""
-        category_slug = self.kwargs.get("category_slug")
-        subcategory_slug = self.kwargs.get("subcategory_slug")
-        lower_category_slug = self.kwargs.get("lower_category_slug")
-
-        category = get_object_or_404(Category, slug=category_slug)
-        subcategory = get_object_or_404(Category, parent=category, slug=subcategory_slug)
-        lower_category = get_object_or_404(Category, parent=subcategory, slug=lower_category_slug)
+        category, subcategory, lower_category = self.get_categories()
         product_slug = self.kwargs.get("product_slug")
         return (
             Product.objects.prefetch_related("product_characteristics", "types_product", "images")
