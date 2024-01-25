@@ -20,14 +20,14 @@ class ProductList(ListAPIView):
 
     - To filter by categories, provide the 'categories' parameter in the URL.
     - To sort by price or rating, use the 'ordering' parameter in the URL.
-      - Example: /products/some_category/?ordering=price - by increase
-      - Example: /products/some_category/?ordering=-price - by decrease
+      - Example: /api/shop/category1/category2/category3/?ordering=price - by increase
+      - Example: /api/shop/category1/category2/category3/?ordering=-price - by decrease
     - To filter by price or type of product, use the next URL
-      - Example: /product/4ef6debc-d407-4de0-929c-0412a15ad61d/?min_price=1000&max_price=1500
+      - Example: /api/shop/category1/category2/category3/?min_price=1000&max_price=1500
     - To search, use the 'search' parameter in the URL
-      - Example: /product/4ef6debc-d407-4de0-929c-0412a15ad61d/?search=brit
+      - Example: /api/shop/category1/category2/category3/?search=brit
     - To paginate, use the 'page' parameter in the URL
-      - Example: /product/4ef6debc-d407-4de0-929c-0412a15ad61d/?page=2&page_size=5
+      - Example: /api/shop/category1/category2/category3/?page=2&page_size=5
     """
 
     serializer_class = ProductListSerializer
