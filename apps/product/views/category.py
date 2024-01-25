@@ -1,11 +1,11 @@
 """
 This module contains Category-related views.
 """
-from rest_framework import generics
 from django.shortcuts import get_object_or_404
+from rest_framework import generics
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
-from apps.base.pagination import PageNumberPagination
 from apps.product.models import Category
 from apps.product.serializers.category import CategorySerializer
 
@@ -16,7 +16,6 @@ class CategoryDetailView(generics.RetrieveAPIView):
     """
 
     serializer_class = CategorySerializer
-    pagination_class = PageNumberPagination
 
     def get_object(self):
         """
@@ -76,3 +75,14 @@ class CategoryDetailView(generics.RetrieveAPIView):
         }
 
         return Response(response_data)
+
+
+class CategoryListView(generics.ListAPIView):
+    """
+    API View for retrieving list of categories.
+    """
+
+    serializer_class = CategorySerializer
+    queryset = Category.objects.prefetch_related("subcategories")
+    pagination_class = PageNumberPagination
+    page_size = 100
