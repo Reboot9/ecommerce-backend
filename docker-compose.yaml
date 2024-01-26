@@ -27,12 +27,27 @@ services:
       - .:/ecommerce_backend
       - static_volume:/ecommerce_backend/static
       - media_volume:/ecommerce_backend/media
-    ports:
-      - "8000:8000"
+    expose:
+      - 8000
     networks:
       - ecommerce_network
     depends_on:
       - db
+
+  nginx:
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: ./nginx/Dockerfile
+    volumes:
+      - static_volume:/ecommerce_backend/static
+      - media_volume:/ecommerce_backend/media
+    ports:
+      - "80:80"
+    networks:
+      - ecommerce_network
+    depends_on:
+      - web
 
 volumes:
   static_volume:

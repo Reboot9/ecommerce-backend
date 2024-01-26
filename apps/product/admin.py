@@ -6,6 +6,8 @@ This module contains the admin configurations for the product app.
 
 from django.contrib import admin
 from django.contrib import messages
+from django.urls import reverse
+from django.utils.html import format_html
 from django.utils.translation import ngettext
 
 from apps.product.models import Manufacturer, Category, Image
@@ -143,11 +145,22 @@ class ManufacturerAdmin(admin.ModelAdmin):
 class CategoryAdmin(admin.ModelAdmin):
     """Admin class for Category model."""
 
-    list_display = (
-        "id",
-        "name",
-    )
-    search_fields = ("name",)
+    list_display = ("name", "slug", "parent_link", "level", "created_at", "updated_at")
+    prepopulated_fields = {"slug": ("name",)}
+    search_fields = ("name", "slug")
+    list_filter = ("level",)
+    ordering = ("level", "created_at")
+    readonly_fields = ("created_at", "updated_at")
+    list_select_related = ("parent",)
+
+    def parent_link(self, obj):
+        """Method to generate link to parent, if exists."""
+        if obj.parent:
+            url = reverse("admin:product_category_change", args=[obj.parent.id])
+            return format_html('<a href="{}">{}</a>', url, obj.parent.name)
+        return "-"
+
+    parent_link.short_description = "Parent Category"
 
 
 class ImageAdmin(admin.ModelAdmin):
