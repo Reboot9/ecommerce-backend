@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('product', '0005_product_discount_percentage_is_positive'),
+        ('product', '0005_rename_product_charactetistic_productcharacteristics_product_characteristic_and_more')
     ]
 
     operations = [
