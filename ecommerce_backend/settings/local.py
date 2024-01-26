@@ -28,9 +28,12 @@ def get_internal_ips() -> list[str]:
 
     # Since our requests will be routed to Django via the nginx container, include
     # the nginx IP address as internal as well
-    nginx_hostname, _, nginx_ips = socket.gethostbyname_ex("nginx")
-    internal_ips += nginx_ips
-
+    try:
+        nginx_hostname, _, nginx_ips = socket.gethostbyname_ex("nginx")
+        internal_ips += nginx_ips
+    except socket.gaierror:
+        # since nginx may not be started at the point that this is first executed.
+        pass
     return internal_ips
 
 
