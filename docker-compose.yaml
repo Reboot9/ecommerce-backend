@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 
 services:
   db:
@@ -38,7 +38,7 @@ services:
     restart: unless-stopped
     build:
       context: .
-      dockerfile: ./nginx/Dockerfile
+      dockerfile: config/nginx/Dockerfile
     volumes:
       - static_volume:/ecommerce_backend/static
       - media_volume:/ecommerce_backend/media
