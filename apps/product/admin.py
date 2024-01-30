@@ -145,7 +145,7 @@ class ManufacturerAdmin(admin.ModelAdmin):
 class CategoryAdmin(admin.ModelAdmin):
     """Admin class for Category model."""
 
-    list_display = ("name", "slug", "parent_link", "level", "created_at", "updated_at")
+    list_display = ("__str__", "slug", "parent_link", "level", "created_at", "updated_at")
     prepopulated_fields = {"slug": ("name",)}
     search_fields = ("name", "slug")
     list_filter = ("level",)
@@ -161,6 +161,30 @@ class CategoryAdmin(admin.ModelAdmin):
         return "-"
 
     parent_link.short_description = "Parent Category"
+
+    def get_form(self, request, obj=None, **kwargs):
+        """
+        Customizes the form used in the CategoryAdmin.
+
+        To exclude the currently edited category from the 'parent' field options.
+
+        :param request: The HTTP request object.
+        :param obj: The current Category instance being edited or None for a new instance.
+        :param kwargs: Additional keyword arguments passed to the method.
+        :return: The customized form.
+        """
+        form = super(CategoryAdmin, self).get_form(request, obj, **kwargs)  # noqa: UP008
+
+        # Remove obj that is edited from relevant options
+        form.base_fields["parent"].queryset = Category.objects.exclude(
+            pk=obj.pk if obj else None,
+        )
+
+        # TODO: exclude categories as parent option that are greater than selected category level \
+        #  every time user clicks on level (more likely via js)
+        # .exclude(level__gte=obj.level if obj else 0)
+
+        return form
 
 
 class ImageAdmin(admin.ModelAdmin):

@@ -50,7 +50,8 @@ class Category(BaseID, BaseDate):
 
         :return: The name of category.
         """
-        return self.name
+        parent_category = f"({self.parent.name})" if self.parent else ""
+        return f"{self.name} {parent_category}"
 
     def clean(self) -> None:
         """
@@ -60,14 +61,14 @@ class Category(BaseID, BaseDate):
 
         if self.level in [1, 2] and not self.parent_id:
             raise ValidationError(
-                {"parent": 'Categories with level "Medium" and "Lower" need to have a parent.'}
+                {"parent": _('Categories with level "Medium" and "Lower" need to have a parent.')}
             )
 
         if self.parent_id and (self.level <= self.parent.level):
             # Despite checking that level <= parent.level, the error message mentions category
             # level must be lower than its parent's level.
             raise ValidationError(
-                {"parent": "Category level must be lower than its parent's category level."}
+                {"parent": _("Category level must be lower than its parent's category level.")}
             )
 
     def get_ancestors(self) -> list:
