@@ -48,11 +48,22 @@ services:
       - ecommerce_network
     depends_on:
       - web
+      - cache
+
+  cache:
+    image: redis:7.0-alpine
+    restart: unless-stopped
+    networks:
+      - ecommerce_network
+    volumes:
+      - redis_data:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
 
 volumes:
   static_volume:
   media_volume:
   postgres_data:
+  redis_data:
 
 networks:
   ecommerce_network:
