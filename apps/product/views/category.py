@@ -27,11 +27,11 @@ class CategoryDetailView(generics.RetrieveAPIView):
         subcategory_slug = self.kwargs.get("subcategory_slug")
 
         if category_slug:
-            parent_category = get_object_or_404(Category, slug=category_slug)
+            parent_category = get_object_or_404(Category, slug=category_slug, level=0)
 
             if subcategory_slug:
                 descendant_category = get_object_or_404(
-                    Category, parent=parent_category, slug=subcategory_slug
+                    Category, parent=parent_category, slug=subcategory_slug, level=1
                 )
                 return descendant_category.subcategories.all()
             else:
