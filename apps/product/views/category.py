@@ -37,7 +37,7 @@ class CategoryDetailView(generics.RetrieveAPIView):
             else:
                 return parent_category
         else:
-            # If no category slug is provided, return top-level categories
+            # If no category slug is provided, return 404
             return Response(status=status.HTTP_404_NOT_FOUND)
 
 
@@ -47,6 +47,6 @@ class CategoryListView(generics.ListAPIView):
     """
 
     serializer_class = CategoryListSerializer
-    queryset = Category.objects.prefetch_related("subcategories")
+    queryset = Category.objects.all()
     pagination_class = PageNumberPagination
     page_size = 100
