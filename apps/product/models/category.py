@@ -20,7 +20,7 @@ class Category(BaseID, BaseDate):
     ]
 
     name = models.CharField(max_length=256, verbose_name=_("Name"), db_index=True)
-    slug = models.SlugField(max_length=256, unique=True)
+    slug = models.SlugField(max_length=256, unique=False)
     parent = models.ForeignKey(
         "self", on_delete=models.CASCADE, null=True, blank=True, related_name="subcategories"
     )
