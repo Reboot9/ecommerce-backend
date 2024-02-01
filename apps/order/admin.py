@@ -24,6 +24,7 @@ class OrderAdmin(admin.ModelAdmin):
     """Admin class for Order model."""
 
     list_display = (
+        "order_number",
         "first_name",
         "last_name",
         "status",

@@ -7,6 +7,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from apps.base.models import BaseDate, BaseID
+from apps.order.utils import phone_validator
 
 
 class Order(BaseID, BaseDate):
@@ -40,6 +41,7 @@ class Order(BaseID, BaseDate):
     phone = models.CharField(
         max_length=17,  # +38(050)111-11-11
         verbose_name=_("Mobile phone"),
+        validators=[phone_validator],
     )
     email = models.EmailField(max_length=250, verbose_name=_("Email"))
     comment = models.CharField(
@@ -52,6 +54,7 @@ class Order(BaseID, BaseDate):
         verbose_name=_("Paid"),
         default=False,
     )
+    order_number = models.IntegerField(unique=True, editable=False)
 
     class Meta:
         db_table = "orders"
