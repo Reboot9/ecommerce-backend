@@ -51,8 +51,10 @@ services:
       - cache
 
   cache:
-    image: redis:7.0-alpine
     restart: unless-stopped
+    build:
+      context: .
+      dockerfile: config/redis/Dockerfile
     env_file:
       - ./.env
     networks:
