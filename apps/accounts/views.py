@@ -2,8 +2,8 @@
 This module contains Django views related to user authentication and creation.
 """
 from django.db.models import QuerySet
-from django.shortcuts import render  # noqa F401
 from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
@@ -12,6 +12,8 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_simplejwt import views as jwt_views
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.conf import settings
+from django.core.cache.backends.base import DEFAULT_TIMEOUT
 
 from apps.accounts import schemas
 from apps.accounts.models import CustomUser
@@ -22,6 +24,8 @@ from apps.accounts.paginators import CustomUserPagination
 
 # TODO: consider about adding more Swagger things like tags
 #  and implement authentication in Swagger via JWT
+
+CACHE_TTL = getattr(settings, "CACHE_TTL", DEFAULT_TIMEOUT)
 
 
 class DecoratedTokenObtainPairView(jwt_views.TokenObtainPairView):
@@ -211,6 +215,30 @@ class UserViewSet(viewsets.ModelViewSet):
         """
         # Only include active users in the queryset
         return CustomUser.objects.filter(is_active=True)
+
+    @method_decorator(cache_page(CACHE_TTL, key_prefix="users"))
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieve a paginated list of users.
+
+        :param request: The HTTP request object.
+        :param args: Additional positional arguments.
+        :param kwargs: Additional keyword arguments.
+        :return: paginated list of users.
+        """
+        return super().list(request, *args, **kwargs)
+
+    @method_decorator(cache_page(CACHE_TTL, key_prefix="users"))
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieve a single user by their id.
+
+        :param request: The HTTP request object.
+        :param args: Additional positional arguments.
+        :param kwargs: Additional keyword arguments.
+        :return: details of the requested user.
+        """
+        return super().retrieve(request, *args, **kwargs)
 
     @swagger_auto_schema(
         operation_description="Registration of new user",
