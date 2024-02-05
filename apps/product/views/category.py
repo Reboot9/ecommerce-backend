@@ -47,6 +47,6 @@ class CategoryListView(generics.ListAPIView):
     """
 
     serializer_class = CategoryListSerializer
-    queryset = Category.objects.all()
+    queryset = Category.objects.prefetch_related("subcategories").filter(parent=None)
     pagination_class = PageNumberPagination
     page_size = 100
