@@ -50,8 +50,8 @@ class Category(BaseID, BaseDate):
 
         :return: The name of category.
         """
-        parent_category = f"({self.parent.name})" if self.parent else ""
-        return f"{self.name} {parent_category}"
+        parent_category = f" ({self.parent})" if self.parent else ""
+        return f"{self.name}{parent_category}"
 
     def clean(self) -> None:
         """
