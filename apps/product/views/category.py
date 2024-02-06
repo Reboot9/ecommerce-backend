@@ -1,13 +1,18 @@
 """
 This module contains Category-related views.
 """
+from django.conf import settings
+from django.core.cache.backends.base import DEFAULT_TIMEOUT
 from django.shortcuts import get_object_or_404
+from django.core.cache import cache
 from rest_framework import generics, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
 from apps.product.models import Category
 from apps.product.serializers.category import CategoryDetailSerializer, CategoryListSerializer
+
+CACHE_TTL = getattr(settings, "CACHE_TTL", DEFAULT_TIMEOUT)
 
 
 class CategoryDetailView(generics.RetrieveAPIView):
@@ -16,6 +21,16 @@ class CategoryDetailView(generics.RetrieveAPIView):
     """
 
     serializer_class = CategoryDetailSerializer
+
+    def get_cache_key(self) -> str:
+        """
+        Method to get cache key for a specific category.
+
+        :return: cache key for the provided category
+        """
+        category_slug = self.kwargs.get("category_slug")
+        subcategory_slug = self.kwargs.get("subcategory_slug")
+        return f"category_detail_{category_slug}_{subcategory_slug}"
 
     def get_object(self):
         """
@@ -40,6 +55,32 @@ class CategoryDetailView(generics.RetrieveAPIView):
             # If no category slug is provided, return 404
             return Response(status=status.HTTP_404_NOT_FOUND)
 
+    def retrieve(self, request, *args, **kwargs) -> Response:
+        """
+        Retrieve a single category by their slug.
+
+        :param request: The HTTP request object.
+        :param args: Additional positional arguments.
+        :param kwargs: Additional keyword arguments.
+        :return: details of the requested Category.
+        """
+        cache_key = self.get_cache_key()
+
+        # Try to get data from cache
+        cached_data = cache.get(cache_key)
+        if cached_data is not None:
+            return Response(cached_data)
+
+        # if not in cache, fetch from the database
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        data = serializer.data
+
+        # set data in cache for future requests
+        cache.set(cache_key, data, timeout=CACHE_TTL)
+
+        return Response(data)
+
 
 class CategoryListView(generics.ListAPIView):
     """
@@ -50,3 +91,42 @@ class CategoryListView(generics.ListAPIView):
     queryset = Category.objects.prefetch_related("subcategories").filter(parent=None)
     pagination_class = PageNumberPagination
     page_size = 100
+
+    def get_cache_key(self) -> str:
+        """
+        Method to get cache key for list of categories.
+
+        :return: cache key for the provided user
+        """
+        return "category_list"
+
+    def list(self, request, *args, **kwargs) -> Response:
+        """
+        Retrieve a paginated list of categories in tree structure.
+
+        :param request: The HTTP request object.
+        :param args: Additional positional arguments.
+        :param kwargs: Additional keyword arguments.
+        :return: paginated list of categories.
+        """
+        cache_key = self.get_cache_key()
+
+        # Try to get data from cache
+        cached_data = cache.get(cache_key)
+        if cached_data is not None:
+            return Response(cached_data)
+
+        # if not in cache, fetch from the database
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            data = self.get_paginated_response(serializer.data).data
+        else:
+            serializer = self.get_serializer(queryset, many=True)
+            data = serializer.data
+
+        # set data in cache for future requests
+        cache.set(cache_key, data, timeout=CACHE_TTL)
+
+        return Response(data)
