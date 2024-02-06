@@ -1,9 +1,11 @@
 """
 This module contains Django views related to user authentication and creation.
 """
+from django.conf import settings
+from django.core.cache import cache
+from django.core.cache.backends.base import DEFAULT_TIMEOUT
 from django.db.models import QuerySet
 from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
@@ -12,15 +14,12 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_simplejwt import views as jwt_views
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.conf import settings
-from django.core.cache.backends.base import DEFAULT_TIMEOUT
 
 from apps.accounts import schemas
 from apps.accounts.models import CustomUser
+from apps.accounts.paginators import CustomUserPagination
 from apps.accounts.serializers.token import TokenRefreshResponseSerializer
 from apps.accounts.serializers.user import UserSerializer
-from apps.accounts.paginators import CustomUserPagination
-
 
 # TODO: consider about adding more Swagger things like tags
 #  and implement authentication in Swagger via JWT
@@ -216,8 +215,16 @@ class UserViewSet(viewsets.ModelViewSet):
         # Only include active users in the queryset
         return CustomUser.objects.filter(is_active=True)
 
-    @method_decorator(cache_page(CACHE_TTL, key_prefix="users"))
-    def list(self, request, *args, **kwargs):
+    def get_cache_key(self, user_id) -> str:
+        """
+        Method to get cache key for a specific user.
+
+        :param user_id: unique identifier of user
+        :return: cache key for the provided user
+        """
+        return f"user_{user_id}_details"
+
+    def list(self, request, *args, **kwargs) -> Response:
         """
         Retrieve a paginated list of users.
 
@@ -226,10 +233,24 @@ class UserViewSet(viewsets.ModelViewSet):
         :param kwargs: Additional keyword arguments.
         :return: paginated list of users.
         """
-        return super().list(request, *args, **kwargs)
+        cache_key = "user_list"
 
-    @method_decorator(cache_page(CACHE_TTL, key_prefix="users"))
-    def retrieve(self, request, *args, **kwargs):
+        # Try to get data from cache
+        cached_data = cache.get(cache_key)
+        if cached_data is not None:
+            return Response(cached_data)
+
+        # If not in cache, fetch from the database
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
+        data = serializer.data
+
+        # Set data in cache for future requests
+        cache.set(cache_key, data, timeout=CACHE_TTL)
+
+        return Response(data)
+
+    def retrieve(self, request, *args, **kwargs) -> Response:
         """
         Retrieve a single user by their id.
 
@@ -238,7 +259,20 @@ class UserViewSet(viewsets.ModelViewSet):
         :param kwargs: Additional keyword arguments.
         :return: details of the requested user.
         """
-        return super().retrieve(request, *args, **kwargs)
+        user_id = kwargs["pk"]
+        cache_key = self.get_cache_key(user_id)
+
+        cached_data = cache.get(cache_key)
+        if cached_data is not None:
+            return Response(cached_data)
+
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        data = serializer.data
+
+        cache.set(cache_key, data, timeout=CACHE_TTL)
+
+        return Response(data)
 
     @swagger_auto_schema(
         operation_description="Registration of new user",
@@ -299,11 +333,32 @@ class UserViewSet(viewsets.ModelViewSet):
                 "refresh": str(refresh),
             }
 
+            # Clear the list cache when a new user is created
+            cache.delete("user_list")
+
             return Response(
                 {"user": serializer.data, "tokens": tokens}, status=status.HTTP_201_CREATED
             )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self, request, *args, **kwargs) -> Response:
+        """
+        Update user instance.
+
+        :param request: The HTTP request object.
+        :param args: Additional positional arguments.
+        :param kwargs: Additional keyword arguments.
+        :return: Response object indicating the result of the update operation.
+        """
+        response = super().update(request, *args, **kwargs)
+
+        # Clear individual user cache and list cache
+        user_id = kwargs["pk"]
+        cache.delete(self.get_cache_key(user_id))
+        cache.delete("user_list")
+
+        return response
 
     @swagger_auto_schema(
         operation_description="Delete user",
@@ -327,5 +382,10 @@ class UserViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         instance.is_active = False
         instance.save()
+
+        # Clear individual user cache and list cache
+        user_id = kwargs["pk"]
+        cache.delete(self.get_cache_key(user_id))
+        cache.delete("user_list")
 
         return Response(status=status.HTTP_204_NO_CONTENT)
