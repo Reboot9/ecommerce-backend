@@ -242,8 +242,13 @@ class UserViewSet(viewsets.ModelViewSet):
 
         # If not in cache, fetch from the database
         queryset = self.filter_queryset(self.get_queryset())
-        serializer = self.get_serializer(queryset, many=True)
-        data = serializer.data
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            data = self.get_paginated_response(serializer.data).data
+        else:
+            serializer = self.get_serializer(queryset, many=True)
+            data = serializer.data
 
         # Set data in cache for future requests
         cache.set(cache_key, data, timeout=CACHE_TTL)
