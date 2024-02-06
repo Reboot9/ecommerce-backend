@@ -43,11 +43,13 @@ DJANGO_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "django_filters",
 ]
 
 # Specific apps for the project
 LOCAL_APPS = [
     "apps.accounts.apps.AccountsConfig",
+    "apps.product.apps.ProductConfig",
 ]
 
 # External packages or libraries integrated into project.
@@ -145,9 +147,10 @@ AUTH_USER_MODEL = "accounts.CustomUser"
 
 # DRF settings
 REST_FRAMEWORK = {
+    "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-    ]
+    ],
 }
 
 # Simple JWT settings
