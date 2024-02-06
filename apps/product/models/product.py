@@ -95,7 +95,10 @@ class Product(BaseID, BaseDate):
     @property
     def price_discount(self):
         """Method for calculating promotional price."""
-        return self.price * ((100 - self.discount_percentage) / 100)
+        if self.price:
+            return self.price * ((100 - self.discount_percentage) / 100)
+        else:
+            return None
 
     def delete(self, *args, **kwargs):
         """TODO: describe this method when the app warehouse will be ready.

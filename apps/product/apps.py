@@ -12,3 +12,9 @@ class ProductConfig(AppConfig):
 
     default_auto_field = "django.db.models.BigAutoField"
     name = "apps.product"
+
+    def ready(self):
+        """
+        Import signals from the product app.
+        """
+        import apps.product.signals  # noqa F401
