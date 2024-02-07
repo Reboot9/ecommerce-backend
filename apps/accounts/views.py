@@ -218,7 +218,7 @@ class UserViewSet(CachedListView, viewsets.ModelViewSet):
 
     def get_cache_key(self, user_id=None) -> str:
         """
-        Method to get cache key for a specific user.
+        Method to get cache key.
 
         :param user_id: unique identifier of user
         :return: cache key for the provided user
@@ -226,7 +226,7 @@ class UserViewSet(CachedListView, viewsets.ModelViewSet):
         if user_id is not None:
             return f"user_{user_id}_details"
 
-        return "user_list"
+        return f"user_list:{hash(frozenset(self.request.query_params.items()))}"
 
     def retrieve(self, request, *args, **kwargs) -> Response:
         """
@@ -251,6 +251,16 @@ class UserViewSet(CachedListView, viewsets.ModelViewSet):
         cache.set(cache_key, data, timeout=CACHE_TTL)
 
         return Response(data)
+
+    def perform_create(self, serializer) -> None:
+        """
+        Perform actions when creating instance.
+
+        :param serializer: The serializer instance used for validation and saving.
+        :return:
+        """
+        # Clear the list cache when a new user is created
+        cache.delete("user_list")
 
     @swagger_auto_schema(
         operation_description="Registration of new user",
@@ -311,32 +321,35 @@ class UserViewSet(CachedListView, viewsets.ModelViewSet):
                 "refresh": str(refresh),
             }
 
-            # Clear the list cache when a new user is created
-            cache.delete("user_list")
-
             return Response(
                 {"user": serializer.data, "tokens": tokens}, status=status.HTTP_201_CREATED
             )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def update(self, request, *args, **kwargs) -> Response:
+    def perform_update(self, serializer) -> None:
         """
-        Update user instance.
+        Perform actions when updating CustomUser instance.
 
-        :param request: The HTTP request object.
-        :param args: Additional positional arguments.
-        :param kwargs: Additional keyword arguments.
-        :return: Response object indicating the result of the update operation.
+        :param serializer: The serializer instance used for validation and saving.
+        :return:
         """
-        response = super().update(request, *args, **kwargs)
-
         # Clear individual user cache and list cache
-        user_id = kwargs["pk"]
+        user_id = self.kwargs.get("pk")
         cache.delete(self.get_cache_key(user_id))
         cache.delete("user_list")
 
-        return response
+    def perform_destroy(self, instance) -> None:
+        """
+        Perform actions when deleting CustomUser instance.
+
+        :param serializer: The serializer instance used for validation and saving.
+        :return:
+        """
+        # Clear individual user cache and list cache
+        user_id = self.kwargs.get("pk")
+        cache.delete(instance.get_cache_key(user_id))
+        cache.delete("user_list")
 
     @swagger_auto_schema(
         operation_description="Delete user",
@@ -360,10 +373,5 @@ class UserViewSet(CachedListView, viewsets.ModelViewSet):
         instance = self.get_object()
         instance.is_active = False
         instance.save()
-
-        # Clear individual user cache and list cache
-        user_id = kwargs["pk"]
-        cache.delete(self.get_cache_key(user_id))
-        cache.delete("user_list")
 
         return Response(status=status.HTTP_204_NO_CONTENT)

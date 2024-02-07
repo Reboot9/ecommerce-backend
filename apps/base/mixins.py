@@ -1,8 +1,6 @@
 """
 This file contains mixins for caching.
 """
-from abc import abstractmethod
-
 from django.conf import settings
 from django.core.cache import cache
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
@@ -18,14 +16,15 @@ class CachedListView:
     Note, that you need to declare get_cache_key method inside your class
     """
 
-    @abstractmethod
     def get_cache_key(self) -> str:
         """
         Method to get the cache key.
 
         :return: cache key
         """
-        pass
+        raise NotImplementedError(
+            f"The 'get_cache_key' method must be implemented in {self.__class__.__name__} class."
+        )
 
     def list(self, request, *args, **kwargs) -> Response:
         """

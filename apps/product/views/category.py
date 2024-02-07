@@ -6,10 +6,10 @@ from django.core.cache.backends.base import DEFAULT_TIMEOUT
 from django.shortcuts import get_object_or_404
 from django.core.cache import cache
 from rest_framework import generics, status
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
 from apps.base.mixins import CachedListView
+from apps.base.pagination import PaginationCommon
 from apps.product.models import Category
 from apps.product.serializers.category import CategoryDetailSerializer, CategoryListSerializer
 
@@ -94,8 +94,7 @@ class CategoryListView(CachedListView, generics.ListAPIView):
 
     serializer_class = CategoryListSerializer
     queryset = Category.objects.prefetch_related("subcategories").filter(parent=None)
-    pagination_class = PageNumberPagination
-    page_size = 100
+    pagination_class = PaginationCommon
 
     def get_cache_key(self) -> str:
         """
@@ -103,4 +102,4 @@ class CategoryListView(CachedListView, generics.ListAPIView):
 
         :return: cache key for the provided category
         """
-        return "category_list"
+        return f"category_list:{hash(frozenset(self.request.query_params.items()))}"

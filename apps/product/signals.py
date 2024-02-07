@@ -32,5 +32,5 @@ def update_category_cache(sender, instance, **kwargs) -> None:
     """
     Signal receiver function to update category cache when a Category instance is saved or deleted.
     """
-    cache_key = "category_list"
-    cache.delete(cache_key)
+    cache_key = "category_list:*"
+    cache.delete_pattern(cache_key)
