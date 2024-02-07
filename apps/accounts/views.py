@@ -17,9 +17,10 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.accounts import schemas
 from apps.accounts.models import CustomUser
-from apps.accounts.paginators import CustomUserPagination
 from apps.accounts.serializers.token import TokenRefreshResponseSerializer
 from apps.accounts.serializers.user import UserSerializer
+from apps.base.mixins import CachedListView
+from apps.base.pagination import PaginationCommon
 
 # TODO: consider about adding more Swagger things like tags
 #  and implement authentication in Swagger via JWT
@@ -198,13 +199,13 @@ class DecoratedTokenRefreshView(jwt_views.TokenRefreshView):
         },
     ),
 )
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(CachedListView, viewsets.ModelViewSet):
     """
     User management API.
     """
 
     serializer_class = UserSerializer
-    pagination_class = CustomUserPagination
+    pagination_class = PaginationCommon
 
     def get_queryset(self) -> QuerySet[CustomUser]:
         """
@@ -215,45 +216,17 @@ class UserViewSet(viewsets.ModelViewSet):
         # Only include active users in the queryset
         return CustomUser.objects.filter(is_active=True)
 
-    def get_cache_key(self, user_id) -> str:
+    def get_cache_key(self, user_id=None) -> str:
         """
         Method to get cache key for a specific user.
 
         :param user_id: unique identifier of user
         :return: cache key for the provided user
         """
-        return f"user_{user_id}_details"
+        if user_id is not None:
+            return f"user_{user_id}_details"
 
-    def list(self, request, *args, **kwargs) -> Response:
-        """
-        Retrieve a paginated list of users.
-
-        :param request: The HTTP request object.
-        :param args: Additional positional arguments.
-        :param kwargs: Additional keyword arguments.
-        :return: paginated list of users.
-        """
-        cache_key = "user_list"
-
-        # Try to get data from cache
-        cached_data = cache.get(cache_key)
-        if cached_data is not None:
-            return Response(cached_data)
-
-        # If not in cache, fetch from the database
-        queryset = self.filter_queryset(self.get_queryset())
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            data = self.get_paginated_response(serializer.data).data
-        else:
-            serializer = self.get_serializer(queryset, many=True)
-            data = serializer.data
-
-        # Set data in cache for future requests
-        cache.set(cache_key, data, timeout=CACHE_TTL)
-
-        return Response(data)
+        return "user_list"
 
     def retrieve(self, request, *args, **kwargs) -> Response:
         """

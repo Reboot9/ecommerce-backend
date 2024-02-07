@@ -9,6 +9,7 @@ from rest_framework import generics, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
+from apps.base.mixins import CachedListView
 from apps.product.models import Category
 from apps.product.serializers.category import CategoryDetailSerializer, CategoryListSerializer
 
@@ -30,7 +31,11 @@ class CategoryDetailView(generics.RetrieveAPIView):
         """
         category_slug = self.kwargs.get("category_slug")
         subcategory_slug = self.kwargs.get("subcategory_slug")
-        return f"category_detail_{category_slug}_{subcategory_slug}"
+        return (
+            f"category_detail_{category_slug}_{subcategory_slug}"
+            if subcategory_slug
+            else f"category_detail_{category_slug}"
+        )
 
     def get_object(self):
         """
@@ -82,7 +87,7 @@ class CategoryDetailView(generics.RetrieveAPIView):
         return Response(data)
 
 
-class CategoryListView(generics.ListAPIView):
+class CategoryListView(CachedListView, generics.ListAPIView):
     """
     API View for retrieving list of categories.
     """
@@ -96,37 +101,6 @@ class CategoryListView(generics.ListAPIView):
         """
         Method to get cache key for list of categories.
 
-        :return: cache key for the provided user
+        :return: cache key for the provided category
         """
         return "category_list"
-
-    def list(self, request, *args, **kwargs) -> Response:
-        """
-        Retrieve a paginated list of categories in tree structure.
-
-        :param request: The HTTP request object.
-        :param args: Additional positional arguments.
-        :param kwargs: Additional keyword arguments.
-        :return: paginated list of categories.
-        """
-        cache_key = self.get_cache_key()
-
-        # Try to get data from cache
-        cached_data = cache.get(cache_key)
-        if cached_data is not None:
-            return Response(cached_data)
-
-        # if not in cache, fetch from the database
-        queryset = self.filter_queryset(self.get_queryset())
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            data = self.get_paginated_response(serializer.data).data
-        else:
-            serializer = self.get_serializer(queryset, many=True)
-            data = serializer.data
-
-        # set data in cache for future requests
-        cache.set(cache_key, data, timeout=CACHE_TTL)
-
-        return Response(data)
