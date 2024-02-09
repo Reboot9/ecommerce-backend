@@ -4,11 +4,10 @@ This module contains Category-related views.
 from django.conf import settings
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
 from django.shortcuts import get_object_or_404
-from django.core.cache import cache
 from rest_framework import generics, status
 from rest_framework.response import Response
 
-from apps.base.mixins import CachedListView
+from apps.base.mixins import CachedListView, CachedRetrieveView
 from apps.base.pagination import PaginationCommon
 from apps.product.models import Category
 from apps.product.serializers.category import CategoryDetailSerializer, CategoryListSerializer
@@ -16,7 +15,7 @@ from apps.product.serializers.category import CategoryDetailSerializer, Category
 CACHE_TTL = getattr(settings, "CACHE_TTL", DEFAULT_TIMEOUT)
 
 
-class CategoryDetailView(generics.RetrieveAPIView):
+class CategoryDetailView(CachedRetrieveView, generics.RetrieveAPIView):
     """
     API View for retrieving single category with its descendants.
     """
@@ -32,9 +31,11 @@ class CategoryDetailView(generics.RetrieveAPIView):
         category_slug = self.kwargs.get("category_slug")
         subcategory_slug = self.kwargs.get("subcategory_slug")
         return (
-            f"category_detail_{category_slug}_{subcategory_slug}"
+            f"category_detail_{category_slug}_{subcategory_slug}:"
+            f"{hash(frozenset(self.request.query_params.items()))}"
             if subcategory_slug
-            else f"category_detail_{category_slug}"
+            else f"category_detail_{category_slug}:"
+            f"{hash(frozenset(self.request.query_params.items()))}"
         )
 
     def get_object(self):
@@ -59,32 +60,6 @@ class CategoryDetailView(generics.RetrieveAPIView):
         else:
             # If no category slug is provided, return 404
             return Response(status=status.HTTP_404_NOT_FOUND)
-
-    def retrieve(self, request, *args, **kwargs) -> Response:
-        """
-        Retrieve a single category by their slug.
-
-        :param request: The HTTP request object.
-        :param args: Additional positional arguments.
-        :param kwargs: Additional keyword arguments.
-        :return: details of the requested Category.
-        """
-        cache_key = self.get_cache_key()
-
-        # Try to get data from cache
-        cached_data = cache.get(cache_key)
-        if cached_data is not None:
-            return Response(cached_data)
-
-        # if not in cache, fetch from the database
-        instance = self.get_object()
-        serializer = self.get_serializer(instance)
-        data = serializer.data
-
-        # set data in cache for future requests
-        cache.set(cache_key, data, timeout=CACHE_TTL)
-
-        return Response(data)
 
 
 class CategoryListView(CachedListView, generics.ListAPIView):
