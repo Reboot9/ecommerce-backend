@@ -16,15 +16,6 @@ class CategoryMixin:
     objects based on slugs provided in the URL kwargs.
     """
 
-    def get_cache_key(self) -> str:
-        """
-        Generate cache key for category objects based on URL kwargs.
-        """
-        category_slug = self.kwargs.get("category_slug")
-        subcategory_slug = self.kwargs.get("subcategory_slug")
-        lower_category_slug = self.kwargs.get("lower_category_slug")
-        return f"category_{category_slug}_{subcategory_slug}_{lower_category_slug}"
-
     def get_categories(self) -> Tuple[Category, Category, Category]:
         """
         Retrieve category, subcategory, and lower-level category objects based on URL kwargs.
