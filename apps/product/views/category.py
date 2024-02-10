@@ -28,15 +28,7 @@ class CategoryDetailView(CachedRetrieveView, generics.RetrieveAPIView):
 
         :return: cache key for the provided category
         """
-        category_slug = self.kwargs.get("category_slug")
-        subcategory_slug = self.kwargs.get("subcategory_slug")
-        return (
-            f"category_detail_{category_slug}_{subcategory_slug}:"
-            f"{hash(frozenset(self.request.query_params.items()))}"
-            if subcategory_slug
-            else f"category_detail_{category_slug}:"
-            f"{hash(frozenset(self.request.query_params.items()))}"
-        )
+        return f"category_detail:{self.request.path}?{self.request.GET.urlencode()}"
 
     def get_object(self):
         """
@@ -77,4 +69,4 @@ class CategoryListView(CachedListView, generics.ListAPIView):
 
         :return: cache key for the provided category
         """
-        return f"category_list:{hash(frozenset(self.request.query_params.items()))}"
+        return f"category_list:{self.request.path}?{self.request.GET.urlencode()}"

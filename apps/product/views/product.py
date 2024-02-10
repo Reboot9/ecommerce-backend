@@ -42,13 +42,7 @@ class ProductList(CategoryMixin, CachedListView, ListAPIView):
         """
         Generate cache key for category objects based on URL kwargs.
         """
-        category_slug = self.kwargs.get("category_slug")
-        subcategory_slug = self.kwargs.get("subcategory_slug")
-        lower_category_slug = self.kwargs.get("lower_category_slug")
-        return (
-            f"product_list_{category_slug}_{subcategory_slug}_{lower_category_slug}:"
-            f"{hash(frozenset(self.request.query_params.items()))}"
-        )
+        return f"product_list:{self.request.path}?{self.request.GET.urlencode()}"
 
     def get_queryset(self):
         """Different filters require different sets of queries."""
@@ -71,11 +65,7 @@ class ProductDetail(CategoryMixin, CachedRetrieveView, RetrieveAPIView):
         """
         Generate cache key based on URL kwargs.
         """
-        product_slug = self.kwargs.get("product_slug")
-        return (
-            f"product_detail_{product_slug}:"
-            f"{hash(frozenset(self.request.query_params.items()))}"
-        )
+        return f"product_detail_{self.request.path}?{self.request.GET.urlencode()}"
 
     def get_queryset(self):
         """Filters the queryset based on the product's unique slug."""

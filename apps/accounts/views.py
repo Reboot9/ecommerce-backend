@@ -224,9 +224,9 @@ class UserViewSet(CachedListView, viewsets.ModelViewSet):
         :return: cache key for the provided user
         """
         if user_id is not None:
-            return f"user_{user_id}_details"
+            return f"user_detail_{self.request.path}?{self.request.GET.urlencode()}"
 
-        return f"user_list:{hash(frozenset(self.request.query_params.items()))}"
+        return f"user_list:{self.request.path}?{self.request.GET.urlencode()}"
 
     def retrieve(self, request, *args, **kwargs) -> Response:
         """
