@@ -28,8 +28,10 @@ COPY --from=builder /usr/local/lib/python3.10/site-packages /usr/local/lib/pytho
 COPY --from=builder /build /ecommerce_backend
 COPY --from=builder /usr/local/bin/gunicorn /usr/local/bin/gunicorn
 
+COPY wait-for-it.sh ./
 COPY docker-entrypoint.sh ./
 
+RUN chmod +x wait-for-it.sh
 RUN chmod +x docker-entrypoint.sh
 
 ENTRYPOINT ["./docker-entrypoint.sh"]
