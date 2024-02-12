@@ -1,8 +1,10 @@
 """
 This module contains Django views related to user authentication and creation.
 """
+from django.conf import settings
+from django.core.cache import cache
+from django.core.cache.backends.base import DEFAULT_TIMEOUT
 from django.db.models import QuerySet
-from django.shortcuts import render  # noqa F401
 from django.utils.decorators import method_decorator
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
@@ -17,11 +19,13 @@ from apps.accounts import schemas
 from apps.accounts.models import CustomUser
 from apps.accounts.serializers.token import TokenRefreshResponseSerializer
 from apps.accounts.serializers.user import UserSerializer
-from apps.accounts.paginators import CustomUserPagination
-
+from apps.base.mixins import CachedListView
+from apps.base.pagination import PaginationCommon
 
 # TODO: consider about adding more Swagger things like tags
 #  and implement authentication in Swagger via JWT
+
+CACHE_TTL = getattr(settings, "CACHE_TTL", DEFAULT_TIMEOUT)
 
 
 class DecoratedTokenObtainPairView(jwt_views.TokenObtainPairView):
@@ -195,13 +199,13 @@ class DecoratedTokenRefreshView(jwt_views.TokenRefreshView):
         },
     ),
 )
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(CachedListView, viewsets.ModelViewSet):
     """
     User management API.
     """
 
     serializer_class = UserSerializer
-    pagination_class = CustomUserPagination
+    pagination_class = PaginationCommon
 
     def get_queryset(self) -> QuerySet[CustomUser]:
         """
@@ -211,6 +215,52 @@ class UserViewSet(viewsets.ModelViewSet):
         """
         # Only include active users in the queryset
         return CustomUser.objects.filter(is_active=True)
+
+    def get_cache_key(self, user_id=None) -> str:
+        """
+        Method to get cache key.
+
+        :param user_id: unique identifier of user
+        :return: cache key for the provided user
+        """
+        if user_id is not None:
+            return f"user_detail_{self.request.path}?{self.request.GET.urlencode()}"
+
+        return f"user_list:{self.request.path}?{self.request.GET.urlencode()}"
+
+    def retrieve(self, request, *args, **kwargs) -> Response:
+        """
+        Retrieve a single user by their id.
+
+        :param request: The HTTP request object.
+        :param args: Additional positional arguments.
+        :param kwargs: Additional keyword arguments.
+        :return: details of the requested user.
+        """
+        user_id = kwargs["pk"]
+        cache_key = self.get_cache_key(user_id)
+
+        cached_data = cache.get(cache_key)
+        if cached_data is not None:
+            return Response(cached_data)
+
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        data = serializer.data
+
+        cache.set(cache_key, data, timeout=CACHE_TTL)
+
+        return Response(data)
+
+    def perform_create(self, serializer) -> None:
+        """
+        Perform actions when creating instance.
+
+        :param serializer: The serializer instance used for validation and saving.
+        :return:
+        """
+        # Clear the list cache when a new user is created
+        cache.delete("user_list")
 
     @swagger_auto_schema(
         operation_description="Registration of new user",
@@ -276,6 +326,30 @@ class UserViewSet(viewsets.ModelViewSet):
             )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def perform_update(self, serializer) -> None:
+        """
+        Perform actions when updating CustomUser instance.
+
+        :param serializer: The serializer instance used for validation and saving.
+        :return:
+        """
+        # Clear individual user cache and list cache
+        user_id = self.kwargs.get("pk")
+        cache.delete(self.get_cache_key(user_id))
+        cache.delete("user_list")
+
+    def perform_destroy(self, instance) -> None:
+        """
+        Perform actions when deleting CustomUser instance.
+
+        :param serializer: The serializer instance used for validation and saving.
+        :return:
+        """
+        # Clear individual user cache and list cache
+        user_id = self.kwargs.get("pk")
+        cache.delete(instance.get_cache_key(user_id))
+        cache.delete("user_list")
 
     @swagger_auto_schema(
         operation_description="Delete user",

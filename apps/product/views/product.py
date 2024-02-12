@@ -7,6 +7,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 
+from apps.base.mixins import CachedRetrieveView, CachedListView
 from apps.base.pagination import PaginationCommon
 from apps.product.filters.product import ProductFilter
 from apps.product.mixins.category import CategoryMixin
@@ -14,7 +15,7 @@ from apps.product.models import Product
 from apps.product.serializers.product import ProductListSerializer, ProductDetailSerializer
 
 
-class ProductList(CategoryMixin, ListAPIView):
+class ProductList(CategoryMixin, CachedListView, ListAPIView):
     """
     Returns a list of products, filtered by categories.
 
@@ -37,6 +38,12 @@ class ProductList(CategoryMixin, ListAPIView):
     search_fields = ["name", "manufacturer__trade_brand", "product_code"]
     pagination_class = PaginationCommon
 
+    def get_cache_key(self) -> str:
+        """
+        Generate cache key for category objects based on URL kwargs.
+        """
+        return f"product_list:{self.request.path}?{self.request.GET.urlencode()}"
+
     def get_queryset(self):
         """Different filters require different sets of queries."""
         category, subcategory, lower_category = self.get_categories()
@@ -47,12 +54,18 @@ class ProductList(CategoryMixin, ListAPIView):
         )
 
 
-class ProductDetail(CategoryMixin, RetrieveAPIView):
+class ProductDetail(CategoryMixin, CachedRetrieveView, RetrieveAPIView):
     """Returns one product."""
 
     serializer_class = ProductDetailSerializer
     lookup_field = "slug"
     lookup_url_kwarg = "product_slug"
+
+    def get_cache_key(self) -> str:
+        """
+        Generate cache key based on URL kwargs.
+        """
+        return f"product_detail_{self.request.path}?{self.request.GET.urlencode()}"
 
     def get_queryset(self):
         """Filters the queryset based on the product's unique slug."""

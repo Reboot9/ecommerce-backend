@@ -1,21 +1,34 @@
 """
 This module contains Category-related views.
 """
+from django.conf import settings
+from django.core.cache.backends.base import DEFAULT_TIMEOUT
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
+from apps.base.mixins import CachedListView, CachedRetrieveView
+from apps.base.pagination import PaginationCommon
 from apps.product.models import Category
 from apps.product.serializers.category import CategoryDetailSerializer, CategoryListSerializer
 
+CACHE_TTL = getattr(settings, "CACHE_TTL", DEFAULT_TIMEOUT)
 
-class CategoryDetailView(generics.RetrieveAPIView):
+
+class CategoryDetailView(CachedRetrieveView, generics.RetrieveAPIView):
     """
     API View for retrieving single category with its descendants.
     """
 
     serializer_class = CategoryDetailSerializer
+
+    def get_cache_key(self) -> str:
+        """
+        Method to get cache key for a specific category.
+
+        :return: cache key for the provided category
+        """
+        return f"category_detail:{self.request.path}?{self.request.GET.urlencode()}"
 
     def get_object(self):
         """
@@ -41,12 +54,19 @@ class CategoryDetailView(generics.RetrieveAPIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
 
-class CategoryListView(generics.ListAPIView):
+class CategoryListView(CachedListView, generics.ListAPIView):
     """
     API View for retrieving list of categories.
     """
 
     serializer_class = CategoryListSerializer
     queryset = Category.objects.prefetch_related("subcategories").filter(parent=None)
-    pagination_class = PageNumberPagination
-    page_size = 100
+    pagination_class = PaginationCommon
+
+    def get_cache_key(self) -> str:
+        """
+        Method to get cache key for list of categories.
+
+        :return: cache key for the provided category
+        """
+        return f"category_list:{self.request.path}?{self.request.GET.urlencode()}"
