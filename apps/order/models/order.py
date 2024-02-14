@@ -7,6 +7,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from apps.base.models import BaseDate, BaseID
+from apps.order.models.delivery import Delivery
 from apps.order.utils import phone_validator
 
 
@@ -55,6 +56,11 @@ class Order(BaseID, BaseDate):
         default=False,
     )
     order_number = models.IntegerField(unique=True, editable=False)
+    delivery = models.ForeignKey(
+        to=Delivery,
+        on_delete=models.CASCADE,
+        related_name="deliveries",
+    )
 
     class Meta:
         db_table = "orders"
@@ -67,6 +73,6 @@ class Order(BaseID, BaseDate):
         Or when the object needs to be represented as a string
         """
         return (
-            f"{self.last_name} {self.first_name}, status-{self.get_status_display()}, "
-            f"paid-{self.is_paid}"
+            f"Order №{self.order_number}, {self.created_at.strftime('%Y-%m-%d %H:%M:%S')}, "
+            f"status-{self.get_status_display()}, paid-{self.is_paid}"
         )
