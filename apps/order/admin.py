@@ -64,6 +64,7 @@ class OrderItemAdmin(admin.ModelAdmin):
     autocomplete_fields = ("product",)  # only ForeignKey or ManyToMany
     list_filter = ("created_at", "updated_at")
     search_fields = ("product", "order")
+    search_help_text = "In this field you can search by such fields: product, order"
     list_per_page = 10
     list_max_show_all = 100
 

@@ -12,13 +12,18 @@ from apps.base.models import BaseDate, BaseID
 class Delivery(BaseID, BaseDate):
     """Model representing a delivery."""
 
+    class DeliveryOptionChoices(models.TextChoices):
+        DELIVERY = "D", _("Delivery")
+        COURIER = "С", _("Сourier")
+
+    option = models.CharField(
+        verbose_name=_("Delivery option"),
+        choices=DeliveryOptionChoices.choices,
+        default=DeliveryOptionChoices.COURIER,
+    )
     city = models.CharField(
         max_length=250,
         verbose_name=_("City"),
-    )
-    option = models.CharField(
-        max_length=250,
-        verbose_name=_("Delivery option"),
     )
     street = models.CharField(
         max_length=250,
@@ -59,7 +64,7 @@ class Delivery(BaseID, BaseDate):
         null=True,
         blank=True,
     )
-    declaration = models.CharField(  # discuss with frontend how to fill it
+    declaration = models.CharField(  # TODO discuss with frontend how to fill it
         max_length=250,
         verbose_name=_("Declaration"),
         null=True,
@@ -76,14 +81,14 @@ class Delivery(BaseID, BaseDate):
 
         Or when the object needs to be represented as a string
         """
-        if self.option == "Delivery":  # ??????????????? discuss with frontend
+        if self.get_option_display() == "Delivery":
             return (
-                f"{self.city}, {self.option}, Department: {self.department}, "
+                f"{self.city}, {self.get_option_display()}, Department: {self.department}, "
                 f"Declaration: {self.declaration}"
             )
         else:
             return (
-                f"{self.city}, {self.option}, Street: {self.street}, House: {self.house}, "
-                f"Flat: {self.flat}, Floor: {self.floor}, Entrance: {self.entrance}, "
-                f"Delivery time: {self.time},"
+                f"{self.city}, {self.get_option_display()}, Street: {self.street}, "
+                f"House: {self.house}, Flat: {self.flat}, Floor: {self.floor}, "
+                f"Entrance: {self.entrance}, Delivery time: {self.time},"
             )

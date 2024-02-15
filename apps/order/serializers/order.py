@@ -7,6 +7,7 @@ from rest_framework import serializers
 
 from apps.base.serializers import BaseDateSerializer
 from apps.order.models.order import Order
+from apps.order.serializers.delivery import DeliverySerializer
 from apps.order.serializers.order_item import OrderItemSerializer
 from apps.order.services import create_order
 
@@ -19,6 +20,7 @@ class OrderSerializer(BaseDateSerializer, serializers.ModelSerializer):
     lastName = serializers.CharField(source="last_name")
     isPaid = serializers.BooleanField(source="is_paid", default=False, required=False)
     orderNumber = serializers.IntegerField(source="order_number", read_only=True)
+    delivery = DeliverySerializer()
 
     class Meta:
         model = Order
@@ -33,10 +35,12 @@ class OrderSerializer(BaseDateSerializer, serializers.ModelSerializer):
             "isPaid",
             "comment",
             "items",
+            "delivery",
         ]
         read_only_fields = ["id", "orderNumber", "status", "isPaid"]
 
-    def create(self, validated_data):
+    def create(self, validated_data) -> Order:
         """Create order."""
         items = validated_data.pop("items")
-        return create_order(items, validated_data)
+        delivery = validated_data.pop("delivery")
+        return create_order(items, delivery, validated_data)

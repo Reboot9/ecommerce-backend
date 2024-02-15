@@ -58,7 +58,9 @@ class Order(BaseID, BaseDate):
     order_number = models.IntegerField(unique=True, editable=False)
     delivery = models.ForeignKey(
         to=Delivery,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="deliveries",
     )
 
