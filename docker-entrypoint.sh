@@ -21,6 +21,6 @@ echo "Database is ready. Starting the development server..."
 ./wait-for-it.sh nginx:80 -- echo "Nginx is ready to accept connections."
 
 # Start the development server
-gunicorn ecommerce_backend.wsgi:application --bind 0.0.0.0:8000 --workers 4 --threads 4
+gunicorn ecommerce_backend.wsgi:application --bind 0.0.0.0:8000 --access-logfile - --error-logfile - --workers 4 --threads 4
 
 exec "$@"
