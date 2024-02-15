@@ -50,6 +50,7 @@ DJANGO_APPS = [
 LOCAL_APPS = [
     "apps.accounts.apps.AccountsConfig",
     "apps.product.apps.ProductConfig",
+    "apps.warehouse.apps.WarehouseConfig",
 ]
 
 # External packages or libraries integrated into project.
@@ -145,6 +146,25 @@ MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "accounts.CustomUser"
+
+# Gunicorn settings
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "level": "INFO",
+            "class": "logging.StreamHandler",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": True,
+        },
+    },
+}
 
 # DRF settings
 REST_FRAMEWORK = {

@@ -12,6 +12,6 @@ do
 done
 
 # Start the development server
-gunicorn ecommerce_backend.wsgi:application --bind 0.0.0.0:8000 --workers 4 --threads 4
+gunicorn ecommerce_backend.wsgi:application --bind 0.0.0.0:8000 --access-logfile - --error-logfile - --workers 4 --threads 4
 
 exec $@
