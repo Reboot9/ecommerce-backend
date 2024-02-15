@@ -29,6 +29,7 @@ urlpatterns = [
     # app endpoints
     path("api/", include("apps.accounts.urls", namespace="accounts")),
     path("api/", include("apps.product.urls", namespace="product")),
+    path("api/", include("apps.order.urls", namespace="order")),
     # JWT token endpoints
     path("api/token/", views.DecoratedTokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/token/refresh/", views.DecoratedTokenRefreshView.as_view(), name="token_refresh"),
