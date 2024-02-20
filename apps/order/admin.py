@@ -6,6 +6,7 @@ This module contains the admin configurations for the order app.
 
 from django.contrib import admin
 
+from apps.order.forms import DeliveryModelAdminForm
 from apps.order.models.delivery import Delivery
 from apps.order.models.order import Order
 from apps.order.models.order_item import OrderItem
@@ -72,6 +73,7 @@ class OrderItemAdmin(admin.ModelAdmin):
 class DeliveryAdmin(admin.ModelAdmin):
     """Admin class for Delivery model."""
 
+    form = DeliveryModelAdminForm
     list_display = ("id", "city", "option", "created_at", "updated_at")
     list_filter = ("created_at", "updated_at", "option")
     search_fields = ("city", "option")

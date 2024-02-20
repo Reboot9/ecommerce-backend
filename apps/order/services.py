@@ -30,7 +30,7 @@ def get_order_items(order: Order, items: Collection[dict]):
     """Get data to create order item."""
     for item in items:
         product_id = item["product_id"]
-        quantity = item["quantity"]
+        quantity = item.get("quantity", 1)
         price = Product.objects.get(pk=product_id).price
         create_order_item(product_id, quantity, price, order)
 
