@@ -19,11 +19,11 @@ class Warehouse(BaseID, BaseDate):
     including its total balance, reserved quantity, and availability for orders.
     """
 
-    product_name = models.ForeignKey(  # 1:1 field?
+    product = models.ForeignKey(  # 1:1 field?
         Product,
         on_delete=models.CASCADE,
-        verbose_name=_("Product name"),
-        help_text=_("The name of the product stored in warehouse"),
+        verbose_name=_("Product"),
+        help_text=_("The product stored in warehouse"),
     )
     total_balance = models.IntegerField(
         default=0,
@@ -44,9 +44,9 @@ class Warehouse(BaseID, BaseDate):
         Calculates and returns the quantity of the product reserved from the warehouse.
         """
         return (
-            Reserve.objects.filter(product=self.product_name, is_active=True).aggregate(
-                Sum("quantity")
-            )["quantity__sum"]
+            Reserve.objects.filter(warehouse_item__product=self.product, is_active=True).aggregate(
+                Sum("warehouse_item__quantity")
+            )["warehouse_item__quantity__sum"]
             or 0
         )
 
@@ -68,6 +68,6 @@ class Warehouse(BaseID, BaseDate):
         :return: string representation of model
         """
         return (
-            f"{self.product_name} - Total: {self.total_balance}, Reserve: {self.reserve},"
+            f"{self.product.name} - Total: {self.total_balance}, Reserve: {self.reserve},"
             f" Free: {self.free_balance}"
         )

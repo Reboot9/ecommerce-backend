@@ -1,6 +1,7 @@
 """
 Module defines Goods consumption model for warehouse app.
 """
+from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -25,16 +26,7 @@ class GoodsConsumption(BaseID, BaseDate):
             _("Write-off"),
         )
 
-    document = models.CharField(
-        max_length=100,
-        help_text=_("Consignment note"),
-    )
-    warehouse_item = models.ForeignKey(
-        WarehouseItem,
-        on_delete=models.CASCADE,
-        related_name="consumptions",
-        help_text=_("Product consumed"),
-    )
+    warehouse_items = GenericRelation(WarehouseItem)
     consumption_type = models.CharField(
         max_length=50,
         choices=ConsumptionTypeChoices.choices,
@@ -60,7 +52,8 @@ class GoodsConsumption(BaseID, BaseDate):
 
         :return: string representation of model
         """
+        warehouse_items_str = ", ".join(str(item) for item in self.warehouse_items.all())
         return (
-            f"Consumption of {self.warehouse_item.product} - "
-            f"Type: {self.get_consumption_type_display()}, Document: {self.document}"
+            f"Consumption Type: {self.consumption_type}, Document: {self.consignmentnote}, "
+            f"Warehouse Items: [{warehouse_items_str}]"
         )

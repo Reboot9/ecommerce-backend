@@ -1,6 +1,7 @@
 """
 Module defines Goods arrival model for warehouse app.
 """
+from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -29,16 +30,7 @@ class GoodsArrival(BaseID, BaseDate):
             _("Inventory"),
         )
 
-    document = models.CharField(  # has to be unique
-        max_length=100,  # 12412412412 - 23.11.2023 10:54
-        help_text=_("Consignment note"),
-    )
-    warehouse_item = models.ForeignKey(
-        WarehouseItem,
-        on_delete=models.CASCADE,
-        related_name="arrivals",
-        help_text=_("Product arrived"),
-    )
+    warehouse_items = GenericRelation(WarehouseItem)
     arrival_type = models.CharField(
         max_length=50,
         choices=ArrivalTypeChoices.choices,
@@ -65,7 +57,8 @@ class GoodsArrival(BaseID, BaseDate):
 
         :return: string representation of model
         """
+        warehouse_items_str = ", ".join(str(item) for item in self.warehouse_items.all())
         return (
-            f"Arrival of {self.warehouse_item.product} - "
-            f"Type: {self.get_arrival_type_display()}, Document: {self.document}"
+            f"Arrival Type: {self.arrival_type}, Document: {self.consignmentnote}, "
+            f"Warehouse Items: [{warehouse_items_str}]"
         )

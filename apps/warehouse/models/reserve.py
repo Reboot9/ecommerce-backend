@@ -37,4 +37,9 @@ class Reserve(BaseID, BaseDate):
 
         :return: string representation of model
         """
-        return f"{self.warehouse_item.product} - Quantity: {self.warehouse_item.quantity}"
+        # warehouse_items_str = ', '.join(str(item) for item in self.warehouse_item.all())
+        return (
+            f"Reserve for Order №{self.order.order_number}, "
+            f"{self.order.created_at.strftime('%Y-%m-%d %H:%M:%S')}, Product: "
+            f"{self.warehouse_item.product}; Quantity: {self.warehouse_item.quantity}"
+        )

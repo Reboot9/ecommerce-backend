@@ -3,5 +3,13 @@ from apps.warehouse.models.goods_consumption import GoodsConsumption
 from apps.warehouse.models.reserve import Reserve
 from apps.warehouse.models.warehouse import Warehouse
 from apps.warehouse.models.warehouse_item import WarehouseItem
+from apps.warehouse.models.consignment_note import ConsignmentNote
 
-__all__ = ["Warehouse", "Reserve", "GoodsArrival", "GoodsConsumption", "WarehouseItem"]
+__all__ = [
+    "Warehouse",
+    "Reserve",
+    "GoodsArrival",
+    "GoodsConsumption",
+    "WarehouseItem",
+    "ConsignmentNote",
+]
