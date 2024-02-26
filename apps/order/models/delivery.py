@@ -37,14 +37,14 @@ class Delivery(BaseID, BaseDate):
         verbose_name=_("House"),
         null=True,
         blank=True,
-        help_text=_("This field can take text. Example: 20B"),
+        help_text=_("This field accepts text. Example: 20B"),
     )
     flat = models.CharField(
         max_length=20,
         verbose_name=_("Flat"),
         null=True,
         blank=True,
-        help_text=_("This field can take text. Example: 30/1"),
+        help_text=_("This field accepts text. Example: 30/1"),
     )
     floor = models.SmallIntegerField(
         verbose_name=_("Floor"),
@@ -55,7 +55,7 @@ class Delivery(BaseID, BaseDate):
         verbose_name=_("Entrance"),
         null=True,
         blank=True,
-        help_text=_("This field can take text. Example: Entrance to a toy store"),
+        help_text=_("This field accepts text. Example: Entrance to a toy store"),
     )
     department = models.CharField(
         max_length=250,
