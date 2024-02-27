@@ -8,6 +8,7 @@ from rest_framework import serializers
 
 from apps.cart.models import Cart
 from apps.cart.serializers.cartitem import CartItemSerializer
+from apps.cart.services.cart import create_or_update_cart, update_cart
 
 User = get_user_model()
 
@@ -29,3 +30,15 @@ class CartSerializer(serializers.ModelSerializer):
         model = Cart
         fields = ["id", "userID", "items", "totalQuantity", "totalPrice"]
         read_only_fields = ["id", "userID", "totalQuantity", "totalPrice"]
+
+    def create(self, validated_data) -> Cart:
+        """Create Cart with goods. Use the POST method."""
+        items = validated_data.pop("items")
+        user = self.context["user"]
+        cart = create_or_update_cart(items, user)
+        return cart
+
+    def update(self, instance, validated_data) -> Cart:
+        """Update item in Cart. Use the PATCH method."""
+        items = validated_data.pop("items")
+        return update_cart(instance, items)
