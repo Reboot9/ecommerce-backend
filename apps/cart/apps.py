@@ -12,5 +12,6 @@ class CartConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "apps.cart"
 
-    # def ready(self):
-    #     import apps.cart.signals  # noqa: F401
+    def ready(self):
+        """Connects signals for the cart app."""
+        import apps.cart.signals  # noqa: F401
