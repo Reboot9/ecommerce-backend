@@ -5,6 +5,7 @@ This module defines the Cartitem model for the cart app.
 """
 
 import decimal
+from decimal import Decimal, ROUND_HALF_UP
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -25,6 +26,12 @@ class CartItem(BaseID, BaseDate):
         max_digits=10,
         decimal_places=2,
     )
+    discount_percentage = models.DecimalField(
+        # TODO add a condition in constraint for product, it must be less than or equal to 100
+        max_digits=5,
+        decimal_places=2,
+        default=0,
+    )
 
     class Meta:
         db_table = "cart_items"
@@ -41,4 +48,7 @@ class CartItem(BaseID, BaseDate):
     @property
     def cost(self) -> decimal.Decimal:
         """Calculate the total cost of item in the cart."""
-        return self.quantity * self.price
+        # TODO DO I NEED TO ADD discount_percentage, cost METHOD AND TOTAL PRICE TO ORDER
+        #  for admin???
+        cost = self.quantity * self.price * ((100 - self.discount_percentage) / 100)
+        return Decimal(cost).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
