@@ -26,7 +26,7 @@ class CartAdmin(admin.ModelAdmin):
         "id",
         "user",
         "total_quantity",
-        # "total_price",
+        "total_price",
         "created_at",
         "updated_at",
         "is_active",
@@ -44,14 +44,18 @@ class CartItemAdmin(admin.ModelAdmin):
 
     list_display = (
         "id",
+        "cart",
         "product",
         "quantity",
         "price",
+        "discount_percentage",
         "cost",
     )
     readonly_fields = ("created_at", "updated_at")
-    search_fields = ("product",)
-    search_help_text = "In this field you can search by such fields: product"
+    list_select_related = ("cart",)
+    autocomplete_fields = ("product",)
+    search_fields = ("product", "cart")
+    search_help_text = "In this field you can search by such fields: product, cart"
     list_filter = ("created_at", "updated_at")
     list_per_page = 10
     list_max_show_all = 100
