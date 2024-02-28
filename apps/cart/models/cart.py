@@ -25,7 +25,10 @@ User = get_user_model()
 class Cart(BaseID, BaseDate):
     """Describe cart."""
 
-    user = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="carts")
+    user = models.ForeignKey(
+        to=User, on_delete=models.CASCADE, related_name="carts"
+    )  # this field has a connection
+    # one to many because the cart is not deleted but becomes inactive
     is_active = models.BooleanField(default=True)
 
     class Meta:
