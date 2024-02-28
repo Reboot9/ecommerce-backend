@@ -71,13 +71,17 @@ def get_detail_cart(pk: UUID) -> QuerySet[Cart]:
     )
 
 
-def delete_cart(cart):
-    """Make the cart inactive when an order is created or there are no items."""
+def deactivate_cart(cart):
+    """Make the cart inactive."""
     cart.is_active = False
     cart.save()
 
 
-def check_cart(cart):
-    """Сheck cart for items."""
+def check_and_deactivate_empty_cart(cart):
+    """
+    Сheck cart for items.
+
+    If there are no items make cart inactive by the calling the deactivate_cart method.
+    """
     if cart.items.count() == 0:
-        delete_cart(cart)
+        deactivate_cart(cart)

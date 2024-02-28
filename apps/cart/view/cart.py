@@ -8,7 +8,7 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 
 from apps.cart.serializers import CartSerializer
-from apps.cart.services.cart import get_detail_cart, delete_cart
+from apps.cart.services.cart import get_detail_cart, deactivate_cart
 
 
 class CartViewSet(viewsets.ModelViewSet):
@@ -35,5 +35,5 @@ class CartViewSet(viewsets.ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         """Delete a cart."""
         instance = self.get_object()
-        delete_cart(instance)
+        deactivate_cart(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)

@@ -8,7 +8,7 @@ from uuid import UUID
 from django.db.models import QuerySet
 
 from apps.cart.models import CartItem
-from apps.cart.services.cart import check_cart
+from apps.cart.services.cart import check_and_deactivate_empty_cart
 
 
 def get_detail_cartitem(pk: UUID) -> QuerySet[CartItem]:
@@ -19,4 +19,4 @@ def get_detail_cartitem(pk: UUID) -> QuerySet[CartItem]:
 def delete_cart_item(cartitem, cart):
     """Delete item."""
     cartitem.delete()
-    check_cart(cart)
+    check_and_deactivate_empty_cart(cart)

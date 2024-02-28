@@ -8,7 +8,7 @@ from django.dispatch import receiver
 from django.shortcuts import get_object_or_404
 
 from apps.cart.models import Cart, CartItem
-from apps.cart.services.cart import delete_cart
+from apps.cart.services.cart import deactivate_cart
 from apps.order.models.order import Order
 from apps.product.models import Product
 
@@ -27,4 +27,4 @@ def delete_cart_after_order(sender, instance, created, **kwargs):
     if created:
         cart = get_object_or_404(Cart, user=instance.user, is_active=True)
         if cart:
-            delete_cart(cart)
+            deactivate_cart(cart)
