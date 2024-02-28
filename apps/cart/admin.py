@@ -16,6 +16,7 @@ class CartItemInline(admin.TabularInline):
     extra = 2
     verbose_name = "Cart item"
     verbose_name_plural = "Cart items"
+    autocomplete_fields = ("product",)
 
 
 class CartAdmin(admin.ModelAdmin):
@@ -53,7 +54,7 @@ class CartItemAdmin(admin.ModelAdmin):
     )
     readonly_fields = ("created_at", "updated_at")
     list_select_related = ("cart",)
-    autocomplete_fields = ("product",)
+    autocomplete_fields = ("product", "cart")
     search_fields = ("product", "cart")
     search_help_text = "In this field you can search by such fields: product, cart"
     list_filter = ("created_at", "updated_at")
