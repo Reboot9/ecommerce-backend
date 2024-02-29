@@ -60,7 +60,7 @@ class Cart(BaseID, BaseDate):
                     output_field=DecimalField(),
                 )
             )
-        )["total_price"]
+        )["total_price"] or Decimal("0")
         return Decimal(total_price).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
     def __str__(self) -> str:
@@ -68,4 +68,4 @@ class Cart(BaseID, BaseDate):
 
         Or when the object needs to be represented as a string
         """
-        return f"{self.user}, {self.created_at.date()}"
+        return f"Cart for {self.user}, {self.created_at.date()}."
