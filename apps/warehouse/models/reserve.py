@@ -1,12 +1,14 @@
 """
 Module defines Reserve model for warehouse app.
 """
+from django.core import validators
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from apps.base.models import BaseDate, BaseID
 from apps.order.models.order import Order
-from apps.warehouse.models.warehouse_item import WarehouseItem
+from apps.product.models import Product
 
 
 class Reserve(BaseID, BaseDate):
@@ -17,11 +19,16 @@ class Reserve(BaseID, BaseDate):
     order = models.ForeignKey(
         Order, on_delete=models.CASCADE, help_text=_("The order for which the product is reserved")
     )
-    warehouse_item = models.ForeignKey(  # m:m
-        WarehouseItem,
+    reserved_item = models.ForeignKey(  # m:m
+        Product,
         on_delete=models.CASCADE,
         related_name="reservations",
         help_text=_("Product reserved"),
+    )
+    quantity = models.PositiveIntegerField(
+        default=0,
+        help_text=_("Quantity of the product"),
+        validators=[validators.MinLengthValidator(1)],
     )
     is_active = models.BooleanField(default=True)
 
@@ -41,5 +48,14 @@ class Reserve(BaseID, BaseDate):
         return (
             f"Reserve for Order №{self.order.order_number}, "
             f"{self.order.created_at.strftime('%Y-%m-%d %H:%M:%S')}, Product: "
-            f"{self.warehouse_item.product}; Quantity: {self.warehouse_item.quantity}"
+            f"{self.reserved_item}; Quantity: {self.quantity}"
         )
+
+    def clean(self):
+        """
+        Override default method to enforce custom validation rules.
+        """
+        super().clean()
+
+        if self.quantity < 1:
+            raise ValidationError(_("Quantity must be at least 1."))
