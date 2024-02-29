@@ -57,7 +57,7 @@ class Transaction(BaseID, BaseDate):
     quantity = models.PositiveIntegerField(
         default=0,
         help_text=_("Quantity of the product"),
-        validators=[validators.MinLengthValidator(1)],
+        validators=[validators.MinValueValidator(1)],
     )
     comment = models.TextField(
         blank=True,
@@ -81,7 +81,7 @@ class Transaction(BaseID, BaseDate):
         """
         # warehouse_items_str = ", ".join(str(item) for item in self.warehouse_items.all())
         return (
-            f"Transaction Type: {self.transaction_type}, Document: {self.consignmentnote}, "
+            f"Transaction Type: {self.transaction_type}, Document: {self.consignment_note}"
             # f"Warehouse Items: [{warehouse_items_str}]"
         )
 
@@ -93,6 +93,11 @@ class Transaction(BaseID, BaseDate):
             self.TransactionTypeChoices.RETURN,
             self.TransactionTypeChoices.INVENTORY,
         ]
+
+    @property
+    def product_category(self):
+        """Display product category."""
+        return self.product.categories
 
     def clean(self):
         """

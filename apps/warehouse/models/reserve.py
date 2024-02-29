@@ -28,7 +28,7 @@ class Reserve(BaseID, BaseDate):
     quantity = models.PositiveIntegerField(
         default=0,
         help_text=_("Quantity of the product"),
-        validators=[validators.MinLengthValidator(1)],
+        validators=[validators.MinValueValidator(1)],
     )
     is_active = models.BooleanField(default=True)
 
