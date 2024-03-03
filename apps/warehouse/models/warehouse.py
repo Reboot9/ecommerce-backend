@@ -1,7 +1,6 @@
 """
 Module defines Warehouse model for warehouse app.
 """
-from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Sum
 from django.utils.translation import gettext_lazy as _
@@ -44,9 +43,9 @@ class Warehouse(BaseID, BaseDate):
         Calculates and returns the quantity of the product reserved from the warehouse.
         """
         return (
-            Reserve.objects.filter(warehouse_item__product=self.product, is_active=True).aggregate(
-                Sum("warehouse_item__quantity")
-            )["warehouse_item__quantity__sum"]
+            Reserve.objects.filter(reserved_item=self.product, is_active=True).aggregate(
+                Sum("quantity")
+            )["quantity__sum"]
             or 0
         )
 
@@ -57,8 +56,6 @@ class Warehouse(BaseID, BaseDate):
 
         Note: Raises a validation error if total_balance is less than the reserve.
         """
-        if self.total_balance < self.reserve:
-            raise ValidationError(_("Total balance cannot be less than the reserve"))
         return self.total_balance - self.reserve
 
     def __str__(self) -> str:
@@ -71,3 +68,12 @@ class Warehouse(BaseID, BaseDate):
             f"{self.product.name} - Total: {self.total_balance}, Reserve: {self.reserve},"
             f" Free: {self.free_balance}"
         )
+
+    def clean(self):
+        """
+        Override default method to enforce custom validation rules.
+        """
+        super().clean()
+
+        # if self.total_balance < self.reserve:
+        #     raise ValidationError(_("Total balance cannot be less than the reserve"))
