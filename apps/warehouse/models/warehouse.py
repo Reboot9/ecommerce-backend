@@ -38,7 +38,7 @@ class Warehouse(BaseID, BaseDate):
         verbose_name_plural = _("Warehouses")
 
     @property
-    def reserve(self):
+    def reserved_quantity(self):
         """
         Calculates and returns the quantity of the product reserved from the warehouse.
         """
@@ -56,7 +56,7 @@ class Warehouse(BaseID, BaseDate):
 
         Note: Raises a validation error if total_balance is less than the reserve.
         """
-        return self.total_balance - self.reserve
+        return self.total_balance - self.reserved_quantity
 
     def __str__(self) -> str:
         """
@@ -65,8 +65,8 @@ class Warehouse(BaseID, BaseDate):
         :return: string representation of model
         """
         return (
-            f"{self.product.name} - Total: {self.total_balance}, Reserve: {self.reserve},"
-            f" Free: {self.free_balance}"
+            f"{self.product.name} - Total: {self.total_balance}, "
+            f"Reserve: {self.reserved_quantity}, Free: {self.free_balance}"
         )
 
     def clean(self):
