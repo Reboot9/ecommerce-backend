@@ -3,7 +3,7 @@ Module: product.py.
 
 This module defines the Product model for the product app.
 """
-
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
@@ -36,8 +36,17 @@ class Product(BaseID, BaseDate):
         decimal_places=2,
         null=True,
         blank=True,
+        help_text=_("This field allows empty value"),
     )
-    discount_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    discount_percentage = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=0,
+        validators=[
+            MinValueValidator(0, message=_("Discount percentage cannot be less than 0.")),
+            MaxValueValidator(100, message=_("Discount percentage cannot be greater than 100.")),
+        ],
+    )
     price = models.DecimalField(
         verbose_name=_("Price"),
         max_digits=10,
@@ -79,9 +88,9 @@ class Product(BaseID, BaseDate):
                 violation_error_message=_("Price must be positive or empty."),
             ),
             models.CheckConstraint(
-                name="discount_percentage_is_positive",
-                check=Q(discount_percentage__gte=0),
-                violation_error_message=_("Discount percentage must be positive or 0."),
+                name="rating_from_0_to_5_or_null",
+                check=Q(rating__gt=0) & Q(rating__lte=5) | Q(rating__isnull=True),
+                violation_error_message=_("Rating must be from 0 to 5 or null."),
             ),
         ]
 
