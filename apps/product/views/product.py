@@ -14,7 +14,7 @@ from apps.product.models import Product
 from apps.product.serializers.product import ProductListSerializer, ProductDetailSerializer
 
 
-class ProductList(CategoryMixin, ListAPIView):
+class ProductCategorytList(CategoryMixin, ListAPIView):
     """
     Returns a list of products, filtered by categories.
 
@@ -63,3 +63,14 @@ class ProductDetail(CategoryMixin, RetrieveAPIView):
             .select_related("manufacturer", "categories")
             .filter(slug=product_slug, categories=lower_category)
         )
+
+
+class ProductList(ListAPIView):
+    """Returns a list of products sorted by creation date(new ones at the beginning)."""
+
+    serializer_class = ProductListSerializer
+    queryset = (
+        Product.objects.prefetch_related("product_characteristics", "types_product", "images")
+        .select_related("manufacturer", "categories")
+        .all()
+    )
