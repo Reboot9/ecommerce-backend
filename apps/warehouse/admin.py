@@ -4,16 +4,19 @@ Django Admin configurations.
 This module provides the configuration for the Django admin interface.
 """
 from django.contrib import admin
-
 from django.db.models import Case, Value, When
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
 from django.utils.translation import gettext_lazy as _
 
+from apps.warehouse.forms import WarehouseTransactionForm
 from apps.warehouse.models import (
     ConsignmentNote,
     Transaction,
     Reserve,
     Warehouse,
 )
+from apps.warehouse.resources import TransactionResource
 
 
 @admin.action(description="Toggle selected is_active status")
@@ -38,6 +41,51 @@ def toggle_is_active(modeladmin, request, queryset):
         f"{'entry was' if updated_count == 1 else 'entries were'} "
         f"toggled.",
         level="SUCCESS",
+    )
+
+
+@admin.action(description="Generate report for chosen items at the Warehouse")
+def generate_transactions_report(modeladmin, request, queryset):
+    """
+    Action to generate transactions report based on dates of transactions and exported filetype.
+
+    :param modeladmin: The ModelAdmin instance.
+    :param request: The current HTTP request.
+    :param queryset: The queryset containing the selected entries.
+    :return: None because this function generates report.
+    """
+    # selected = queryset.values_list("pk", flat=True)
+    # ct = ContentType.objects.get_for_model(queryset.model)
+    selected = queryset.values_list("pk", flat=True)
+    if request.method == "POST":
+        form = WarehouseTransactionForm(request.POST)
+        if form.is_valid():
+            start_date = form.cleaned_data["start_date"]
+            end_date = form.cleaned_data["end_date"]
+            file_type = form.cleaned_data["file_type"]
+
+            selected_products = queryset.values_list("product__pk", flat=True)
+            print(selected, selected_products)
+            transactions = Transaction.objects.filter(
+                product__id__in=selected_products,
+                created_at__range=(start_date, end_date),
+                is_active=True,
+            )
+            print(transactions)
+            # Generate report using django-import-export
+            resource = TransactionResource()
+            dataset = resource.export(transactions)
+            print(dataset)
+            if file_type == "xml":
+                print(file_type)
+            modeladmin.message_user(request, "Action performed successfully.")
+
+            # Return to previous page
+            return HttpResponseRedirect(request.get_full_path())
+
+    form = WarehouseTransactionForm(initial={"_selected_action": selected})
+    return render(
+        request, "admin/warehouse_transaction_report.html", {"items": queryset, "form": form}
     )
 
 
@@ -230,7 +278,7 @@ class WarehouseAdmin(admin.ModelAdmin):
         "product__product_code",
     ]
     search_help_text = _("Search for warehouse instances by product name and it's product code")
-    actions = [toggle_is_active]
+    actions = [toggle_is_active, generate_transactions_report]
     readonly_fields = ("created_at", "updated_at")
     fieldsets = (
         (
