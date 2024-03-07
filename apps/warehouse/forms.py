@@ -14,16 +14,15 @@ class WarehouseTransactionForm(forms.Form):
 
     _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
     start_date = forms.DateField(
-        initial=timezone.now().date() - timedelta(weeks=4),
+        initial=lambda: (timezone.now().date() - timedelta(weeks=4)).strftime("%d/%m/%Y"),
         label="Start Date",
-        widget=forms.DateInput(attrs={"type": "date", "format": "%d/%m/%Y"}),
         input_formats=["%d/%m/%Y"],
+        widget=forms.DateInput(attrs={"class": "datepicker"}),
     )
     end_date = forms.DateField(
-        initial=timezone.now().date(),
+        initial=lambda: timezone.now().date().strftime("%d/%m/%Y"),
         label="End Date",
-        widget=forms.DateInput(attrs={"type": "date", "format": "%d/%m/%Y"}),
         input_formats=["%d/%m/%Y"],
+        widget=forms.DateInput(attrs={"class": "datepicker"}),
     )
     file_type = forms.ChoiceField(choices=(("xml", "XML"), ("csv", "CSV"), ("xls", "Excel")))
-    # bot = forms.ModelChoiceField(Warehouse.objects)
