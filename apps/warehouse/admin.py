@@ -3,9 +3,12 @@ Django Admin configurations.
 
 This module provides the configuration for the Django admin interface.
 """
+from datetime import timedelta
+
 from django.contrib import admin
+from django.contrib import messages
 from django.db.models import Case, Value, When
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse
 from django.shortcuts import render
 from django.utils.translation import gettext_lazy as _
 
@@ -17,6 +20,7 @@ from apps.warehouse.models import (
     Warehouse,
 )
 from apps.warehouse.resources import TransactionResource
+from apps.warehouse.utils import generate_xml
 
 
 @admin.action(description="Toggle selected is_active status")
@@ -57,7 +61,7 @@ def generate_transactions_report(modeladmin, request, queryset):
     # selected = queryset.values_list("pk", flat=True)
     # ct = ContentType.objects.get_for_model(queryset.model)
     selected = queryset.values_list("pk", flat=True)
-    if request.method == "POST":
+    if "apply" in request.POST:
         form = WarehouseTransactionForm(request.POST)
         if form.is_valid():
             start_date = form.cleaned_data["start_date"]
@@ -65,24 +69,41 @@ def generate_transactions_report(modeladmin, request, queryset):
             file_type = form.cleaned_data["file_type"]
 
             selected_products = queryset.values_list("product__pk", flat=True)
-            print(selected, selected_products)
             transactions = Transaction.objects.filter(
                 product__id__in=selected_products,
-                created_at__range=(start_date, end_date),
+                created_at__range=(start_date, end_date + timedelta(days=1)),
                 is_active=True,
             )
-            print(transactions)
             # Generate report using django-import-export
             resource = TransactionResource()
             dataset = resource.export(transactions)
             print(dataset)
+
             if file_type == "xml":
-                print(file_type)
-            modeladmin.message_user(request, "Action performed successfully.")
+                # custom exporting logic for xml filetype
+                xml_string = generate_xml(transactions)
+                response = HttpResponse(xml_string, content_type="application/xml")
 
-            # Return to previous page
-            return HttpResponseRedirect(request.get_full_path())
-
+            else:
+                # Export dataset to specified file format
+                response = HttpResponse(
+                    dataset.export(file_type), content_type=f"application/{file_type}"
+                )
+            formatted_start_date = start_date.strftime("%d.%m.%Y")
+            formatted_end_date = end_date.strftime("%d.%m.%Y")
+            response["Content-Disposition"] = (
+                f'attachment; filename="transactions_report_'
+                f'{formatted_start_date}-{formatted_end_date}.{file_type}"'
+            )
+            return response
+        else:
+            # Display form errors
+            messages.error(request, form.errors)
+            return render(
+                request,
+                "admin/warehouse_transaction_report.html",
+                {"items": queryset, "form": form},
+            )
     form = WarehouseTransactionForm(initial={"_selected_action": selected})
     return render(
         request, "admin/warehouse_transaction_report.html", {"items": queryset, "form": form}
