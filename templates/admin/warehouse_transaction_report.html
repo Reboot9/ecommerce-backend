@@ -1,16 +1,57 @@
 {% extends "admin/base_site.html" %}
+{% load static %}
 
 {% block extrahead %}
   <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+{#    TODO: fix that this style is not found. #}
+{#    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/custom-datepicker.css' %}">#}
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
     <script>
-        $(function() {
-          $(".datepicker").datepicker({
-              dateFormat: 'dd/mm/yy'
-          });
-        });
+    $(function() {
+      $(".datepicker").datepicker({
+        dateFormat: 'dd/mm/yy',
+        // Add ui-darkness class for dark theme
+        beforeShow: function(input, inst) {
+          var theme = $('html').attr('data-theme');
+          $(inst.dpDiv).removeClass("ui-widget ui-widget-content ui-corner-all ui-helper-clearfix ui-datepicker-dark ui-datepicker-light");
+          if (theme === "dark") {
+            $(inst.dpDiv).addClass("ui-widget ui-widget-content ui-corner-all ui-helper-clearfix ui-datepicker-dark");
+          } else {
+            $(inst.dpDiv).addClass("ui-widget ui-widget-content ui-corner-all ui-helper-clearfix ui-datepicker-light");
+          }
+        }
+      });
+    });
     </script>
+{#    TODO: Remove <style> after fixing this bug. #}
+    <style>
+        /* Appearance of the datepicker for dark theme */
+        .ui-datepicker-dark .ui-datepicker-header {
+          background: #333;
+          color: #fff;
+        }
+        .ui-datepicker-dark .ui-state-default {
+          background: #666;
+          color: #fff;
+        }
+        .ui-datepicker-dark .ui-state-default:hover {
+          background: #999;
+        }
+
+        /* Appearance of the datepicker for light theme */
+        .ui-datepicker-light .ui-datepicker-header {
+          background: #fff;
+          color: #333;
+        }
+        .ui-datepicker-light .ui-state-default {
+          background: #f5f5f5;
+          color: #333;
+        }
+        .ui-datepicker-light .ui-state-default:hover {
+          background: #e5e5e5;
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
