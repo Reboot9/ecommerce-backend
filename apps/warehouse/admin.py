@@ -8,7 +8,6 @@ from datetime import timedelta
 from django.contrib import admin
 from django.contrib import messages
 from django.db.models import Case, Value, When
-from django.http import HttpResponse
 from django.shortcuts import render
 from django.utils.translation import gettext_lazy as _
 
@@ -19,8 +18,7 @@ from apps.warehouse.models import (
     Reserve,
     Warehouse,
 )
-from apps.warehouse.resources import TransactionResource
-from apps.warehouse.utils import generate_xml
+from apps.warehouse.utils import generate_report
 
 
 @admin.action(description="Toggle selected is_active status")
@@ -74,27 +72,10 @@ def generate_transactions_report(modeladmin, request, queryset):
                 created_at__range=(start_date, end_date + timedelta(days=1)),
                 is_active=True,
             )
-            # Generate report using django-import-export
-            resource = TransactionResource()
-            dataset = resource.export(transactions)
-            print(dataset)
 
-            if file_type == "xml":
-                # custom exporting logic for xml filetype
-                xml_string = generate_xml(transactions)
-                response = HttpResponse(xml_string, content_type="application/xml")
+            # Generate report
+            response = generate_report(transactions, file_type, start_date, end_date)
 
-            else:
-                # Export dataset to specified file format
-                response = HttpResponse(
-                    dataset.export(file_type), content_type=f"application/{file_type}"
-                )
-            formatted_start_date = start_date.strftime("%d.%m.%Y")
-            formatted_end_date = end_date.strftime("%d.%m.%Y")
-            response["Content-Disposition"] = (
-                f'attachment; filename="transactions_report_'
-                f'{formatted_start_date}-{formatted_end_date}.{file_type}"'
-            )
             return response
         else:
             # Display form errors
