@@ -11,17 +11,11 @@ class FileTypeChoices:
     """A class defining constants for different file types and their choices."""
 
     XML = "xml"
-    CSV = "csv"
     JSON = "json"
-    XLS = "xls"
-    XLSX = "xlsx"
 
     CHOICES = [
         (XML, "XML"),
-        (CSV, "CSV"),
         (JSON, "JSON"),
-        (XLS, "XLS"),
-        (XLSX, "XLSX"),
     ]
 
 

@@ -59,7 +59,6 @@ THIRD_PARTY_APPS = [
     "rest_framework_simplejwt",
     "drf_yasg",
     "rest_framework_simplejwt.token_blacklist",  # required to blacklist tokens after rotation
-    "import_export",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + THIRD_PARTY_APPS

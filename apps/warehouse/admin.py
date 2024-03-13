@@ -6,6 +6,7 @@ This module provides the configuration for the Django admin interface.
 import json
 
 from django.contrib import admin
+
 from django.contrib import messages
 from django.db.models import Case, Value, When
 from django.http import HttpResponse
@@ -54,11 +55,6 @@ def toggle_is_active(modeladmin, request, queryset):
 def generate_transactions_report(modeladmin, request, queryset):
     """
     Action to generate transactions report based on dates of transactions and exported filetype.
-
-    :param modeladmin: The ModelAdmin instance.
-    :param request: The current HTTP request.
-    :param queryset: The queryset containing the selected entries.
-    :return: None because this function generates report.
     """
     selected_warehouses = queryset.values_list("pk", flat=True)
     if "apply" in request.POST:
