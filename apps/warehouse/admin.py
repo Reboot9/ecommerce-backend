@@ -287,6 +287,7 @@ class WarehouseAdmin(admin.ModelAdmin):
     list_display = [
         "id",
         "product",
+        "product_category",
         "total_balance",
         "reserved_quantity",
         "free_balance",
@@ -347,3 +348,11 @@ class WarehouseAdmin(admin.ModelAdmin):
 
     free_balance.short_description = _("Free Balance")
     free_balance.admin_order_field = "free_balance"
+
+    def product_category(self, obj):
+        """
+        Returns the product category.
+        """
+        return obj.product.categories
+
+    product_category.short_description = _("Product Category")
