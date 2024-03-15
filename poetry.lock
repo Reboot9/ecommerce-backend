@@ -209,6 +209,25 @@ python-jose = ["python-jose (==3.3.0)"]
 test = ["cryptography", "freezegun", "pytest", "pytest-cov", "pytest-django", "pytest-xdist", "tox"]
 
 [[package]]
+name = "djangorestframework-xml"
+version = "2.0.0"
+description = "XML support for Django REST Framework"
+optional = false
+python-versions = ">=3.5"
+files = [
+    {file = "djangorestframework-xml-2.0.0.tar.gz", hash = "sha256:35f6c811d0ab8c8466b26db234e16a2ed32d76381715257aebf4c7be2c202ca1"},
+    {file = "djangorestframework_xml-2.0.0-py2.py3-none-any.whl", hash = "sha256:975955fbb0d49ac44a90bdeb33b7923d95b79884d283f983e116c80a936ef4d0"},
+]
+
+[package.dependencies]
+defusedxml = ">=0.6.0"
+
+[package.extras]
+dev = ["Django (>=1.6)", "djangorestframework (>=2.4.3)", "flake8", "mkdocs (>=0.11.1)", "pre-commit", "pytest", "pytest-django", "tox"]
+docs = ["mkdocs (>=0.11.1)"]
+tests = ["Django (>=1.6)", "djangorestframework (>=2.4.3)", "flake8", "pytest", "pytest-django"]
+
+[[package]]
 name = "drf-yasg"
 version = "1.21.7"
 description = "Automated generation of real Swagger/OpenAPI 2.0 schemas from Django Rest Framework code."
@@ -836,4 +855,5 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "389253ff8e22a365efbbc1fdc1740cd13263080de0c302d539661cc590e976bd"
+content-hash = "43c500533bad49fcd599f28adf3d776e6019c7414d3b76c35aec06c56874c6ef"
+
