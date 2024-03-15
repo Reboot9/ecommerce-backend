@@ -3,13 +3,16 @@ Django Admin configurations.
 
 This module provides the configuration for the Django admin interface.
 """
-from datetime import timedelta
+import json
 
 from django.contrib import admin
 from django.contrib import messages
 from django.db.models import Case, Value, When
+from django.http import HttpResponse
 from django.shortcuts import render
 from django.utils.translation import gettext_lazy as _
+from rest_framework.renderers import JSONRenderer
+from rest_framework_xml.renderers import XMLRenderer
 
 from apps.warehouse.forms import WarehouseTransactionForm
 from apps.warehouse.models import (
@@ -18,7 +21,8 @@ from apps.warehouse.models import (
     Reserve,
     Warehouse,
 )
-from apps.warehouse.utils import generate_report
+
+from apps.warehouse.serializers.warehouse import WarehouseSerializer
 
 
 @admin.action(description="Toggle selected is_active status")
@@ -56,9 +60,7 @@ def generate_transactions_report(modeladmin, request, queryset):
     :param queryset: The queryset containing the selected entries.
     :return: None because this function generates report.
     """
-    # selected = queryset.values_list("pk", flat=True)
-    # ct = ContentType.objects.get_for_model(queryset.model)
-    selected = queryset.values_list("pk", flat=True)
+    selected_warehouses = queryset.values_list("pk", flat=True)
     if "apply" in request.POST:
         form = WarehouseTransactionForm(request.POST)
         if form.is_valid():
@@ -66,15 +68,38 @@ def generate_transactions_report(modeladmin, request, queryset):
             end_date = form.cleaned_data["end_date"]
             file_type = form.cleaned_data["file_type"]
 
-            selected_products = queryset.values_list("product__pk", flat=True)
-            transactions = Transaction.objects.filter(
-                product__id__in=selected_products,
-                created_at__range=(start_date, end_date + timedelta(days=1)),
-                is_active=True,
-            )
+            # Available renderers for model
+            file_type_renderers = {
+                "json": JSONRenderer(),
+                "xml": XMLRenderer(),
+            }
 
-            # Generate report
-            response = generate_report(transactions, file_type, start_date, end_date)
+            if file_type not in file_type_renderers:
+                messages.error(request, "Unsupported file type")
+                return render(
+                    request,
+                    "admin/warehouse_transaction_report.html",
+                    {"items": queryset, "form": form},
+                )
+            # Serialize warehouse and transactions data
+            warehouse_serializer = WarehouseSerializer(
+                queryset, many=True, context={"start_date": start_date, "end_date": end_date}
+            )
+            renderer = file_type_renderers[file_type]
+            report_data = renderer.render(warehouse_serializer.data)
+
+            # Prettify JSON output with an indent of 4 spaces
+            if file_type == "json":
+                report_data = json.dumps(json.loads(report_data), indent=4)
+
+            response = HttpResponse(report_data, content_type=f"text/{file_type}")
+            formatted_start_date = start_date.strftime("%d.%m.%Y")
+            formatted_end_date = end_date.strftime("%d.%m.%Y")
+            file_name = (
+                f"warehouse_transactions_report_"
+                f"{formatted_start_date}-{formatted_end_date}.{file_type}"
+            )
+            response["Content-Disposition"] = f'attachment; filename="{file_name}"'
 
             return response
         else:
@@ -85,7 +110,9 @@ def generate_transactions_report(modeladmin, request, queryset):
                 "admin/warehouse_transaction_report.html",
                 {"items": queryset, "form": form},
             )
-    form = WarehouseTransactionForm(initial={"_selected_action": selected})
+
+    form = WarehouseTransactionForm(initial={"_selected_action": selected_warehouses})
+
     return render(
         request, "admin/warehouse_transaction_report.html", {"items": queryset, "form": form}
     )
@@ -268,6 +295,7 @@ class WarehouseAdmin(admin.ModelAdmin):
         "updated_at",
     ]
     list_filter = [
+        "product__categories__name",
         "is_active",
         "created_at",
         "updated_at",
@@ -278,6 +306,7 @@ class WarehouseAdmin(admin.ModelAdmin):
     search_fields = [
         "product__name",
         "product__product_code",
+        "product__categories__name",
     ]
     search_help_text = _("Search for warehouse instances by product name and it's product code")
     actions = [toggle_is_active, generate_transactions_report]
