@@ -10,6 +10,7 @@ from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.translation import ngettext
 
+from apps.product.filters.category import BaseSubcategoryFilter, ProductSubcategoryFilter
 from apps.product.models import Manufacturer, Category, Image
 from apps.product.models.product import ProductCharacteristics, TypeProductCharacteristics, Product
 
@@ -83,7 +84,13 @@ class ProductAdmin(admin.ModelAdmin):
         " product code, slug, manufacturer, categories"
     )
     autocomplete_fields = ("manufacturer", "categories")
-    list_filter = ("stock", "discount_percentage", "created_at", "updated_at")
+    list_filter = (
+        "stock",
+        "discount_percentage",
+        ProductSubcategoryFilter,
+        "created_at",
+        "updated_at",
+    )
     list_editable = ("price", "discount_percentage", "stock")
     prepopulated_fields = {"slug": ("name", "product_code")}
     actions = ("remove_discount",)
@@ -148,7 +155,10 @@ class CategoryAdmin(admin.ModelAdmin):
     list_display = ("__str__", "slug", "parent_link", "level", "created_at", "updated_at")
     prepopulated_fields = {"slug": ("name",)}
     search_fields = ("name", "slug")
-    list_filter = ("level",)
+    list_filter = (
+        "level",
+        BaseSubcategoryFilter,
+    )
     ordering = ("level", "created_at")
     readonly_fields = ("created_at", "updated_at")
     list_select_related = ("parent",)
