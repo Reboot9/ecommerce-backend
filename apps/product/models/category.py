@@ -98,11 +98,7 @@ class Category(BaseID, BaseDate):
 
         :return: Category objects representing the descendants.
         """
-        descendants = list(
-            self.subcategories.all()
-            .select_related("subcategories")
-            .prefetch_related("subcategories")
-        )
+        descendants = list(self.subcategories.all())
 
         # Recursively fetch descendants for each subcategory.
         for descendant in descendants:
