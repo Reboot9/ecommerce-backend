@@ -15,6 +15,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework.renderers import JSONRenderer
 from rest_framework_xml.renderers import XMLRenderer
 
+from apps.warehouse.filters.category import WarehouseSubcategoryFilter
 from apps.warehouse.forms import WarehouseTransactionForm
 from apps.warehouse.models import (
     ConsignmentNote,
@@ -294,6 +295,7 @@ class WarehouseAdmin(admin.ModelAdmin):
     list_filter = [
         "product__categories__name",
         "is_active",
+        WarehouseSubcategoryFilter,
         "created_at",
         "updated_at",
     ]
