@@ -82,7 +82,7 @@ class WarehouseSerializer(serializers.ModelSerializer):
         :param obj: warehouse instance
         :return: total quantity of written off items
         """
-        return self.get_items_count(obj, "write_off")
+        return self.get_items_count(obj, "write-off")
 
     def get_returned_items(self, obj) -> int:
         """

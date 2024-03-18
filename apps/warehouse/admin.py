@@ -6,7 +6,6 @@ This module provides the configuration for the Django admin interface.
 import json
 
 from django.contrib import admin
-
 from django.contrib import messages
 from django.db.models import Case, Value, When
 from django.http import HttpResponse
@@ -23,8 +22,8 @@ from apps.warehouse.models import (
     Reserve,
     Warehouse,
 )
-
 from apps.warehouse.serializers.warehouse import WarehouseSerializer
+from apps.warehouse.utils import calculate_total_quantities
 
 
 @admin.action(description="Toggle selected is_active status")
@@ -82,8 +81,25 @@ def generate_transactions_report(modeladmin, request, queryset):
             warehouse_serializer = WarehouseSerializer(
                 queryset, many=True, context={"start_date": start_date, "end_date": end_date}
             )
+
+            transaction_types = ["order", "write-off", "return"]
+            total_quantities = calculate_total_quantities(
+                warehouse_serializer.data, transaction_types
+            )
+
+            total_quantity_ordered = total_quantities["order"]
+            total_quantity_written_off = total_quantities["write-off"]
+            total_quantity_returned = total_quantities["return"]
+
             renderer = file_type_renderers[file_type]
-            report_data = renderer.render(warehouse_serializer.data)
+            report_data = renderer.render(
+                {
+                    "total_quantity_ordered": total_quantity_ordered,
+                    "total_quantity_written_off": total_quantity_written_off,
+                    "total_quantity_returned": total_quantity_returned,
+                    "items": warehouse_serializer.data,
+                }
+            )
 
             # Prettify JSON output with an indent of 4 spaces
             if file_type == "json":
