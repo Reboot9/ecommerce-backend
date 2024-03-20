@@ -51,7 +51,7 @@ class OrderItem(BaseID, BaseDate):
 
         Or when the object needs to be represented as a string
         """
-        return f"{self.product}"
+        return f"{self.product} from {self.order}"
 
     @property
     def order_item_cost(self) -> Decimal:
