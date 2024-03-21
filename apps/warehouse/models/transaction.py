@@ -7,6 +7,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from apps.base.models import BaseDate, BaseID
+from apps.order.models.order_item import OrderItem
 from apps.product.models import Product
 from apps.warehouse.models.consignment_note import ConsignmentNote
 
@@ -48,6 +49,13 @@ class Transaction(BaseID, BaseDate):
         related_name="transactions",
         help_text=_("Product related to this transaction"),
     )
+    order_item = models.ForeignKey(
+        OrderItem,
+        on_delete=models.CASCADE,
+        related_name="transactions",
+        null=True,
+        help_text=_("Order item related to this transaction"),
+    )
     consignment_note = models.ForeignKey(ConsignmentNote, on_delete=models.CASCADE)
     transaction_type = models.CharField(
         max_length=50,
@@ -71,7 +79,7 @@ class Transaction(BaseID, BaseDate):
         ordering = ["-created_at"]
         db_table = "goods_transaction"
         verbose_name = _("Goods Transaction")
-        verbose_name_plural = _("Goods Transaction")
+        verbose_name_plural = _("Goods Transactions")
 
     def __str__(self):
         """

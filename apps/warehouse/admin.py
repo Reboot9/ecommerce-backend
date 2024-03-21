@@ -183,6 +183,7 @@ class TransactionAdmin(admin.ModelAdmin):
                     "consignment_note",
                     "transaction_type",
                     "product",
+                    "order_item",
                     "quantity",
                     "comment",
                 )
