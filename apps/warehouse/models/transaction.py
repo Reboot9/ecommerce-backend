@@ -56,7 +56,13 @@ class Transaction(BaseID, BaseDate):
         null=True,
         help_text=_("Order item related to this transaction"),
     )
-    consignment_note = models.ForeignKey(ConsignmentNote, on_delete=models.CASCADE)
+    consignment_note = models.ForeignKey(
+        ConsignmentNote,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        help_text=_("Note that this field may be blank."),
+    )
     transaction_type = models.CharField(
         max_length=50,
         choices=TransactionTypeChoices.choices,
