@@ -72,6 +72,7 @@ class Order(BaseID, BaseDate):
         db_table = "orders"
         verbose_name = "Order"
         verbose_name_plural = "Orders"
+        ordering = ["-order_number"]
 
     def __str__(self):
         """This method is automatically called when you use the str() function.
