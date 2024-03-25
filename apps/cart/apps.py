@@ -1,6 +1,4 @@
 """
-Module: apps.py.
-
 This module contains the app configuration for the cart app.
 """
 from django.apps import AppConfig

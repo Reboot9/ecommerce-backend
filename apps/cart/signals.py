@@ -1,7 +1,5 @@
 """
-Module: cart signals.
-
-This module contains Django signals related to the Cart models.
+Django signals related to the Cart models.
 """
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
@@ -33,5 +31,6 @@ def delete_cart_after_order(sender, instance, created, **kwargs):
             cart = Cart.objects.get(user=user, is_active=True)
             deactivate_cart(cart)
         except ObjectDoesNotExist:
-            pass  # Cart or user not found, this is possible in two cases if the user is not
-            # registered or the order was created through the admin panel without a cart
+            pass  # Cart or user not found, this is possible in two cases:
+            # if the user is not registered
+            # or the order was created through the admin panel without a cart

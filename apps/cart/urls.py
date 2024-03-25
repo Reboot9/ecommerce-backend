@@ -6,7 +6,7 @@ This module contains urls for the cart app.
 from django.urls import path, include
 from rest_framework.routers import SimpleRouter
 
-from apps.cart.view import CartViewSet, CartItemViewSet
+from apps.cart.views import CartViewSet, CartItemViewSet
 
 cart_router = SimpleRouter()
 cart_router.register(prefix="carts", viewset=CartViewSet, basename="carts")

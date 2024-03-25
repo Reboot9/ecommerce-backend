@@ -1,6 +1,4 @@
 """
-Module for working with carts.
-
 This module provides functionality for creating carts and associated cart items.
 """
 import decimal
@@ -20,7 +18,7 @@ User = get_user_model()
 
 @transaction.atomic
 def update_cart(instance, items):
-    """Get product, quantity and update it."""
+    """Update the quantities of items in the cart."""
     for item in items:
         product_id = item["product_id"]
         quantity = item["quantity"]
@@ -58,13 +56,13 @@ def get_product_for_cart(cart: Cart, items: list[dict]):
 
 @transaction.atomic
 def create_or_update_cart(items: list[dict], user: User) -> Cart:
-    """Create a new Cart or update Cart and return it."""
+    """Create or update a cart for the specified user with the provided items."""
     cart, created = Cart.objects.get_or_create(user=user, is_active=True)
     get_product_for_cart(cart, items)
     return cart
 
 
-def get_detail_cart(pk: UUID) -> QuerySet[Cart]:
+def get_cart_detail(pk: UUID) -> QuerySet[Cart]:
     """Return detailed data for a specific cart."""
     return (
         Cart.objects.prefetch_related("items").select_related("user").filter(pk=pk, is_active=True)
@@ -79,7 +77,7 @@ def deactivate_cart(cart):
 
 def check_and_deactivate_empty_cart(cart):
     """
-    Сheck cart for items.
+    Check cart for items.
 
     If there are no items make cart inactive by the calling the deactivate_cart method.
     """

@@ -25,10 +25,8 @@ User = get_user_model()
 class Cart(BaseID, BaseDate):
     """Describe cart."""
 
-    user = models.ForeignKey(
-        to=User, on_delete=models.CASCADE, related_name="carts"
-    )  # this field has a connection
-    # one to many because the cart is not deleted but becomes inactive
+    # this field has a one to many connection because cart becomes inactive after deleting
+    user = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="carts")
     is_active = models.BooleanField(default=True)
 
     class Meta:
@@ -46,9 +44,14 @@ class Cart(BaseID, BaseDate):
     @property
     def total_quantity(self):
         """Count the total number of items in the cart."""
-        return self.items.aggregate(
-            total_quantity=ExpressionWrapper(Sum("quantity"), output_field=PositiveIntegerField())
-        )["total_quantity"]
+        return (
+            self.items.aggregate(
+                total_quantity=ExpressionWrapper(
+                    Sum("quantity"), output_field=PositiveIntegerField()
+                )
+            )["total_quantity"]
+            or 0
+        )
 
     @property
     def total_price(self):
@@ -68,4 +71,7 @@ class Cart(BaseID, BaseDate):
 
         Or when the object needs to be represented as a string
         """
-        return f"Cart for {self.user}, {self.created_at.date()}."
+        return (
+            f"Cart for {self.user}, Created: {self.created_at.date()} "
+            f"Is Active: {self.is_active}"
+        )
