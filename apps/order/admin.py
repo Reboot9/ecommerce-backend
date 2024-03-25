@@ -41,6 +41,7 @@ class OrderAdmin(admin.ModelAdmin):
         "phone",
         "email",
         "comment",
+        "total_order_price",
         "is_paid",
         "created_at",
         "updated_at",
@@ -60,7 +61,16 @@ class OrderAdmin(admin.ModelAdmin):
 class OrderItemAdmin(admin.ModelAdmin):
     """Admin class for OrderItem model."""
 
-    list_display = ("order", "price", "product", "quantity", "created_at", "updated_at")
+    list_display = (
+        "order",
+        "discount_percentage",
+        "price",
+        "product",
+        "quantity",
+        "order_item_cost",
+        "created_at",
+        "updated_at",
+    )
     list_select_related = ("order",)
     autocomplete_fields = ("product",)  # only ForeignKey or ManyToMany
     list_filter = ("created_at", "updated_at")

@@ -3,6 +3,7 @@ Module: product.py.
 
 This module defines the Product model for the product app.
 """
+from decimal import Decimal, ROUND_HALF_UP
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -34,6 +35,11 @@ class OrderItem(BaseID, BaseDate):
         on_delete=models.CASCADE,
         related_name="order_items",
     )
+    discount_percentage = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=0,
+    )
 
     class Meta:
         db_table = "order_items"
@@ -46,3 +52,9 @@ class OrderItem(BaseID, BaseDate):
         Or when the object needs to be represented as a string
         """
         return f"{self.product}"
+
+    @property
+    def order_item_cost(self) -> Decimal:
+        """Calculate the total cost of item in the order."""
+        cost = self.quantity * self.price * ((100 - self.discount_percentage) / 100)
+        return Decimal(cost).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)

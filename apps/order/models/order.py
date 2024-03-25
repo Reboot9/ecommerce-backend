@@ -3,7 +3,11 @@ Module: order.py.
 
 This module defines the Order model for the order app.
 """
+from decimal import Decimal, ROUND_HALF_UP
+
 from django.db import models
+from django.db.models import Sum, ExpressionWrapper, F, DecimalField
+
 from django.utils.translation import gettext_lazy as _
 
 from apps.base.models import BaseDate, BaseID
@@ -68,6 +72,7 @@ class Order(BaseID, BaseDate):
         db_table = "orders"
         verbose_name = "Order"
         verbose_name_plural = "Orders"
+        ordering = ["-order_number"]
 
     def __str__(self):
         """This method is automatically called when you use the str() function.
@@ -78,3 +83,16 @@ class Order(BaseID, BaseDate):
             f"Order №{self.order_number}, {self.created_at.strftime('%Y-%m-%d %H:%M:%S')}, "
             f"status-{self.get_status_display()}, paid-{self.is_paid}"
         )
+
+    @property
+    def total_order_price(self):
+        """Calculate the total cost of items in the order."""
+        total_price = self.items.aggregate(
+            total_price=Sum(
+                ExpressionWrapper(
+                    F("quantity") * F("price") * ((100 - F("discount_percentage")) / 100),
+                    output_field=DecimalField(),
+                )
+            )
+        )["total_price"] or Decimal("0")
+        return Decimal(total_price).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
