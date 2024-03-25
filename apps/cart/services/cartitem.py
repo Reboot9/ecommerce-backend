@@ -1,7 +1,7 @@
 """
-Module for working with cartitems.
+Module for working with CartItems.
 
-This module provides functionality for creating cartitems.
+This module provides functionality for creating CartItems.
 """
 from uuid import UUID
 
@@ -11,12 +11,12 @@ from apps.cart.models import CartItem
 from apps.cart.services.cart import check_and_deactivate_empty_cart
 
 
-def get_detail_cartitem(pk: UUID) -> QuerySet[CartItem]:
-    """Return detailed data for a specific item."""
+def get_cartitem_detail(pk: UUID) -> QuerySet[CartItem]:
+    """Return detailed data for a specific item in the Cart."""
     return CartItem.objects.select_related("cart", "product").filter(pk=pk)
 
 
 def delete_cart_item(cartitem, cart):
-    """Delete item."""
+    """Delete item from the cart."""
     cartitem.delete()
     check_and_deactivate_empty_cart(cart)

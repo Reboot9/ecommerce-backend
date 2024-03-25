@@ -1,7 +1,5 @@
 """
-Module: cartitems.py.
-
-This module defines the Cartitem model for the cart app.
+This module defines the CartItem model for the cart app.
 """
 
 import decimal
@@ -16,7 +14,7 @@ from apps.product.models import Product
 
 
 class CartItem(BaseID, BaseDate):
-    """Describe item of cart."""
+    """Describes item from cart."""
 
     cart = models.ForeignKey(to=Cart, on_delete=models.CASCADE, related_name="items")
     product = models.ForeignKey(to=Product, on_delete=models.CASCADE, related_name="cart_items")

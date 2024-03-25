@@ -1,18 +1,16 @@
 """
-Module: views.py.
-
-This module contains handler for the cart app.
+This module contains necessary Cart views for the cart app.
 """
 from rest_framework import permissions
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 
 from apps.cart.serializers import CartSerializer
-from apps.cart.services.cart import get_detail_cart, deactivate_cart
+from apps.cart.services.cart import get_cart_detail, deactivate_cart
 
 
 class CartViewSet(viewsets.ModelViewSet):
-    """Handlers for operation with carts."""
+    """Cart management API."""
 
     http_method_names = ["get", "post", "patch", "delete"]
     serializer_class = CartSerializer
@@ -21,7 +19,7 @@ class CartViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Return the queryset for the view."""
         if self.action in {"retrieve", "partial_update", "destroy"}:
-            return get_detail_cart(pk=self.kwargs["pk"])
+            return get_cart_detail(pk=self.kwargs["pk"])
 
     def create(self, request, *args, **kwargs):
         """Create a new cart."""

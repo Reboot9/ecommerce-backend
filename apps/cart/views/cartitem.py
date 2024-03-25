@@ -1,18 +1,16 @@
 """
-Module: views.py.
-
-This module contains handler for the cart app.
+This module contains Cart item API views for the cart app.
 """
 from rest_framework import permissions
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 
 from apps.cart.serializers import CartItemSerializer
-from apps.cart.services.cartitem import get_detail_cartitem, delete_cart_item
+from apps.cart.services.cartitem import get_cartitem_detail, delete_cart_item
 
 
 class CartItemViewSet(viewsets.ModelViewSet):
-    """Handlers for operation with items."""
+    """CartItem API handler."""
 
     http_method_names = ["get", "delete"]
     serializer_class = CartItemSerializer
@@ -21,10 +19,10 @@ class CartItemViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Return the queryset for the view."""
         if self.action in {"retrieve", "destroy"}:
-            return get_detail_cartitem(pk=self.kwargs["pk"])
+            return get_cartitem_detail(pk=self.kwargs["pk"])
 
     def destroy(self, request, *args, **kwargs):
-        """Delete a cartitem."""
+        """Delete a CartItem."""
         instance = self.get_object()
         cart = instance.cart
         delete_cart_item(instance, cart)

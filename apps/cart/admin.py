@@ -1,6 +1,4 @@
 """
-Module: admin.py.
-
 This module contains the admin configurations for the cart app.
 """
 
