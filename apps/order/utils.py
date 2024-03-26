@@ -18,9 +18,8 @@ def create_reserve(order_instance, item):
     """
     from apps.warehouse.models import Reserve
 
-    reserve, _ = Reserve.objects.get_or_create(
-        order=order_instance, reserved_item=item.product, quantity=item.quantity
-    )
+    reserve, _ = Reserve.objects.get_or_create(order=order_instance, reserved_item=item.product)
+    reserve.quantity = item.quantity
     reserve.save()
 
 
@@ -37,18 +36,17 @@ def create_or_update_transaction(order_instance, item, *, transaction_type):
         Order.OrderStatusChoices.CANCELED,
         Order.OrderStatusChoices.ISSUE,
     ]
-    print(is_active)
+
     transaction, _ = Transaction.objects.get_or_create(
         product=item.product,
         order_item=item,
-        quantity=item.quantity,
     )
     transaction.transaction_type = transaction_type
+    transaction.quantity = item.quantity
     transaction.is_active = is_active
     transaction.save()
 
     related_reserve = Reserve.objects.get(order=order_instance, reserved_item=item.product)
-
     # Update is_active based on the conditions
     if order_instance.status in [
         Order.OrderStatusChoices.CANCELED,
