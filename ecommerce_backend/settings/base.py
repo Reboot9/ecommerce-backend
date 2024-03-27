@@ -43,14 +43,13 @@ DJANGO_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    "django_filters",
+    "django_filters"
 ]
 
 # Specific apps for the project
 LOCAL_APPS = [
     "apps.accounts.apps.AccountsConfig",
     "apps.product.apps.ProductConfig",
-    "apps.warehouse.apps.WarehouseConfig",
 ]
 
 # External packages or libraries integrated into project.

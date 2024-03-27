@@ -9,7 +9,7 @@ from django.utils.decorators import method_decorator
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
-from rest_framework import viewsets
+from rest_framework import viewsets, generics
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_simplejwt import views as jwt_views
@@ -17,6 +17,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.accounts import schemas
 from apps.accounts.models import CustomUser
+from apps.accounts.serializers import google, facebook
 from apps.accounts.serializers.token import TokenRefreshResponseSerializer
 from apps.accounts.serializers.user import UserSerializer
 from apps.base.mixins import CachedListView
@@ -375,3 +376,102 @@ class UserViewSet(CachedListView, viewsets.ModelViewSet):
         instance.save()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+
+class GoogleSocialAuthView(generics.GenericAPIView):
+
+    serializer_class = google.GoogleSocialAuthSerializer
+
+    @swagger_auto_schema(
+        operation_description="Login with Google",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "auth_token": schemas.social_auth_token,
+            },
+            required=[
+                "auth_token"
+            ],
+        ),
+        responses={
+            status.HTTP_200_OK: openapi.Response(
+                description="User authficated by google oAUTH2 successfully",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "user": schemas.user_response_schema,
+                        "tokens": openapi.Schema(
+                            type=openapi.TYPE_OBJECT,
+                            properties={
+                                "access": schemas.access_token_schema,
+                                "refresh": schemas.refresh_token_schema,
+                            },
+                        ),
+                    },
+                ),
+            )
+        }
+    )
+    def post(self, request):
+        """
+
+        POST with "auth_token"
+
+        Send an idtoken as from google to get user information
+
+        """
+
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = ((serializer.validated_data)['auth_token'])
+        return Response(data, status=status.HTTP_200_OK)
+    
+
+class FacebookSocialAuthView(generics.GenericAPIView):
+
+    serializer_class = facebook.FacebookSocialAuthSerializer
+
+
+    @swagger_auto_schema(
+        operation_description="Login with Facebook",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "auth_token": schemas.social_auth_token,
+            },
+            required=[
+                "auth_token"
+            ],
+        ),
+        responses={
+            status.HTTP_200_OK: openapi.Response(
+                description="User authficated by Facebook GraphAPI successfully",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "user": schemas.user_response_schema,
+                        "tokens": openapi.Schema(
+                            type=openapi.TYPE_OBJECT,
+                            properties={
+                                "access": schemas.access_token_schema,
+                                "refresh": schemas.refresh_token_schema,
+                            },
+                        ),
+                    },
+                ),
+            )
+        }
+    )
+    def post(self, request):
+        """
+
+        POST with "auth_token"
+
+        Send an access token as from facebook to get user information
+
+        """
+
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = ((serializer.validated_data)['auth_token'])
+        return Response(data, status=status.HTTP_200_OK)

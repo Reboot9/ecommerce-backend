@@ -45,7 +45,6 @@ class CustomUserManager(BaseUserManager):
 
         return self.create_user(email, password, **extra_fields)
 
-
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     """
     Custom user model with email as the unique identifier.
@@ -62,6 +61,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_superuser = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    auth_provider = models.CharField(
+        max_length=255, blank=False,
+        null=False, default="email"
+    )
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
