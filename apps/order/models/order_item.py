@@ -5,6 +5,7 @@ This module defines the Product model for the product app.
 """
 from decimal import Decimal, ROUND_HALF_UP
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -58,3 +59,12 @@ class OrderItem(BaseID, BaseDate):
         """Calculate the total cost of item in the order."""
         cost = self.quantity * self.price * ((100 - self.discount_percentage) / 100)
         return Decimal(cost).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    def clean(self):
+        """
+        Override default method to enforce custom validation rules.
+        """
+        super().clean()
+
+        if self.quantity < 1:
+            raise ValidationError(_("Quantity must be at least 1."))
