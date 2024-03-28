@@ -9,3 +9,7 @@ class WarehouseConfig(AppConfig):
 
     default_auto_field = "django.db.models.BigAutoField"
     name = "apps.warehouse"
+
+    def ready(self):
+        """Method called when the app is ready. Connects signals, related to Warehouse."""
+        import apps.warehouse.signals  # noqa: F401

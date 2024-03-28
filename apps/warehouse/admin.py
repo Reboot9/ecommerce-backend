@@ -10,6 +10,8 @@ from django.contrib import messages
 from django.db.models import Case, Value, When
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.urls import reverse
+from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from rest_framework.renderers import JSONRenderer
 from rest_framework_xml.renderers import XMLRenderer
@@ -131,6 +133,16 @@ def generate_transactions_report(modeladmin, request, queryset):
     )
 
 
+def product_link(obj):
+    """Method to generate link to product, if exists."""
+    if obj.product:
+        url = reverse("admin:product_product_change", args=[obj.product.id])
+        return format_html('<a href="{}">{}</a>', url, obj.product)
+    return "-"
+
+
+product_link.short_description = "Product"
+
 # class ConsignmentNoteInline(admin.StackedInline):
 #     """
 #     Inline for managing ConsignmentNote objects in the admin.
@@ -153,7 +165,7 @@ class TransactionAdmin(admin.ModelAdmin):
         "get_consignment_number",
         "get_consignment_date",
         "transaction_type",
-        "product",
+        product_link,
         "product_category",
         "quantity",
         "comment",
@@ -246,7 +258,7 @@ class ConsignmentNoteAdmin(admin.ModelAdmin):
         (
             _("Additional Information"),
             {
-                "fields": ("is_active", "created_at", "updated_at"),
+                "fields": ("created_at", "updated_at"),
                 "classes": ("collapse",),
             },
         ),
@@ -300,7 +312,7 @@ class WarehouseAdmin(admin.ModelAdmin):
 
     list_display = [
         "id",
-        "product",
+        product_link,
         "product_category",
         "total_balance",
         "reserved_quantity",
