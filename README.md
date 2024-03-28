@@ -4,8 +4,7 @@
 
 - [Overview](#overview)
 - [Getting Started](#getting-started)
-- [Dependencies](#dependencies)
-- [Installation](#installation)
+- [Launch](#installation)
 
 ## Overview
 
@@ -19,20 +18,40 @@ Before you begin, ensure you have met the following requirements:
 - You have [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) installed on your
   machine.
 
-Make sure to set the required environment variables in the .env file before running the project.
+Make sure to set the required environment variables in the .env file before running the project(Note, that
+`ALLOWED_HOSTS` accepts comma separated values).
 Refer to the .env.example file for a template of the required variables.
 
-## Dependencies
-
-## Installation
+## Launch
 
 After you create .env file and set required variables inside of it, run the following command in your terminal
 
-```docker-compose up -d --build```
+1. **Run Docker**:
+   - Execute the following command in your terminal:
 
-- The `-d` flag used to run docker in detached mode so you can use your terminal
-- The `--build` flag ensures that the images are built before starting the containers.
+     ```bash
+     docker-compose up -d --build
+     ```
 
-To stop the project and containers, press Ctrl+C in the terminal
-or run `docker-compose down` where docker-compose is
-running. This will gracefully shut down the containers.
+   - Use `-d` flag for detached mode.
+   - `--build` flag ensures docker images are built before container startup.
+
+2. **Stop the Project**:
+   - To stop the project and containers, run:
+
+     ```bash
+     docker-compose down
+     ```
+
+   - Execute this command in the terminal where `docker-compose` is running.
+   - This gracefully shuts down the containers.
+
+3. **Create Superuser**:
+   - After successful launch, run:
+
+     ```bash
+     docker-compose exec web python3 manage.py createsuperuser --settings=ecommerce_backend.settings.local
+     ```
+4. **Access Admin Panel**:
+   - Visit the admin panel by entering one of the hostnames declared in the `.env` `ALLOWED_HOSTS` variable followed by `/admin/`.
+   - Log in with the credentials you provided while creating the superuser.
