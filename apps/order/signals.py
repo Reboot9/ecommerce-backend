@@ -1,7 +1,6 @@
 """
 Django signals related to the order app.
 """
-
 from django.db.models import Max
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
@@ -67,9 +66,7 @@ def create_reserves_for_order_item(sender, instance, created, **kwargs):
             Order.OrderStatusChoices.NEW,
             Order.OrderStatusChoices.PROCESSING,
         ]:
-            Reserve.objects.create(
-                order=order, reserved_item=instance.product, quantity=instance.quantity
-            )
+            create_reserve(order, instance)
         else:
             # Determine transaction type and is_active flag based on order status
             is_active = order_status not in [
@@ -97,3 +94,19 @@ def create_reserves_for_order_item(sender, instance, created, **kwargs):
                 order=order,
                 reserved_item=instance.product,
             ).update(is_active=False)
+    else:
+        # Update related reserve and transaction
+        order = instance.order
+        reserve = Reserve.objects.get(
+            order=order,
+            reserved_item=instance.product,
+        )
+        transaction = Transaction.objects.get(
+            order_item=instance, transaction_type=Transaction.TransactionTypeChoices.ORDER
+        )
+
+        reserve.quantity = instance.quantity
+        reserve.save()
+
+        transaction.quantity = instance.quantity
+        transaction.save()

@@ -53,8 +53,6 @@ class Warehouse(BaseID, BaseDate):
     def free_balance(self):
         """
         Calculates and returns the quantity of the product available for order.
-
-        Note: Raises a validation error if total_balance is less than the reserve.
         """
         return self.total_balance - self.reserved_quantity
 

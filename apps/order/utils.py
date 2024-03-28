@@ -46,16 +46,16 @@ def create_or_update_transaction(order_instance, item, *, transaction_type):
     transaction.is_active = is_active
     transaction.save()
 
-    related_reserve = Reserve.objects.get(order=order_instance, reserved_item=item.product)
+    reserve = Reserve.objects.get(order=order_instance, reserved_item=item.product)
+    reserve.quantity = item.quantity
     # Update is_active based on the conditions
-    if order_instance.status in [
-        Order.OrderStatusChoices.CANCELED,
-        Order.OrderStatusChoices.ISSUE,
-    ]:
-        related_reserve.is_active = False
-    elif is_active:
-        related_reserve.is_active = False
-    else:
-        related_reserve.is_active = True
+    reserve.is_active = not (
+        order_instance.status
+        in [
+            Order.OrderStatusChoices.CANCELED,
+            Order.OrderStatusChoices.ISSUE,
+        ]
+        or is_active
+    )
 
-    related_reserve.save()
+    reserve.save()

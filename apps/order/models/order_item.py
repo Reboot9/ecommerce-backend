@@ -12,6 +12,7 @@ from django.utils.translation import gettext_lazy as _
 from apps.base.models import BaseDate, BaseID
 from apps.order.models.order import Order
 from apps.product.models import Product
+from apps.warehouse.models.warehouse import Warehouse
 
 
 class OrderItem(BaseID, BaseDate):
@@ -68,3 +69,17 @@ class OrderItem(BaseID, BaseDate):
 
         if self.quantity < 1:
             raise ValidationError(_("Quantity must be at least 1."))
+
+        if self.order.status == Order.OrderStatusChoices.NEW or self._state.adding:
+            warehouse = Warehouse.objects.get(product=self.product)
+            available_quantity = warehouse.free_balance
+
+            if not self._state.adding:
+                # If the instance is being updated
+                old_instance = OrderItem.objects.get(pk=self.pk)
+                available_quantity += old_instance.quantity  # add back the old quantity
+
+            if self.quantity > available_quantity:
+                raise ValidationError(
+                    _("Not enough quantity available in the warehouse for this product.")
+                )
