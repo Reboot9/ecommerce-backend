@@ -54,6 +54,7 @@ class Transaction(BaseID, BaseDate):
         on_delete=models.CASCADE,
         related_name="transactions",
         null=True,
+        blank=True,
         help_text=_("Order item related to this transaction"),
     )
     consignment_note = models.ForeignKey(

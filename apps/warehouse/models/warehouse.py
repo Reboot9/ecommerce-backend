@@ -23,6 +23,7 @@ class Warehouse(BaseID, BaseDate):
         on_delete=models.CASCADE,
         verbose_name=_("Product"),
         help_text=_("The product stored in warehouse"),
+        related_name="warehouse",
     )
     total_balance = models.IntegerField(
         default=0,
