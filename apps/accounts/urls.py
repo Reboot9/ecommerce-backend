@@ -20,5 +20,5 @@ router.register(r"users", UserViewSet, basename="user")
 urlpatterns = [
     path("", include(router.urls)),
     path("auth/google/", GoogleSocialAuthView.as_view()),
-    path("auth/facebook", FacebookSocialAuthView.as_view()),
+    path("auth/facebook/", FacebookSocialAuthView.as_view()),
 ]
