@@ -1,6 +1,7 @@
 """
 Defines the custom user model and related manager for authentication and authorization purposes.
 """
+from apps.base import models as base
 
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
@@ -46,7 +47,7 @@ class CustomUserManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
 
 
-class CustomUser(AbstractBaseUser, PermissionsMixin):
+class CustomUser(AbstractBaseUser, PermissionsMixin, base.BaseDate, base.BaseID):
     """
     Custom user model with email as the unique identifier.
 
@@ -60,12 +61,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    auth_provider = models.CharField(
-        max_length=255, blank=False,
-        null=False, default="email"
-    )
+    auth_provider = models.CharField(max_length=255, blank=False, null=False, default="email")
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
