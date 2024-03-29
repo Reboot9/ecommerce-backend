@@ -22,7 +22,7 @@ from django.contrib import admin
 from django.urls import path, include, re_path
 from rest_framework import permissions
 
-from apps.accounts import views
+from apps.accounts.views import jwt_tokens
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -30,8 +30,12 @@ urlpatterns = [
     path("api/", include("apps.accounts.urls", namespace="accounts")),
     path("api/", include("apps.product.urls", namespace="product")),
     # JWT token endpoints
-    path("api/token/", views.DecoratedTokenObtainPairView.as_view(), name="token_obtain_pair"),
-    path("api/token/refresh/", views.DecoratedTokenRefreshView.as_view(), name="token_refresh"),
+    path(
+        "api/token/", jwt_tokens.DecoratedTokenObtainPairView.as_view(), name="token_obtain_pair"
+    ),
+    path(
+        "api/token/refresh/", jwt_tokens.DecoratedTokenRefreshView.as_view(), name="token_refresh"
+    ),
 ]
 
 if settings.DEBUG:

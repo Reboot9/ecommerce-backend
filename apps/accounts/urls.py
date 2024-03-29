@@ -8,12 +8,12 @@ handling user authentication, registration, and profile-related views.
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from apps.accounts import views
+from apps.accounts.views.user import UserViewSet
 
 app_name = "accounts"
 
 router = DefaultRouter()
-router.register(r"users", views.UserViewSet, basename="user")
+router.register(r"users", UserViewSet, basename="user")
 
 urlpatterns = [
     path("", include(router.urls)),
