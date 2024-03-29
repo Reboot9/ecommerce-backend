@@ -7,11 +7,6 @@ and clarity in the API documentation.
 """
 from drf_yasg import openapi
 
-
-social_auth_token = openapi.Schema(
-    type=openapi.TYPE_STRING, description="Token from autheficate social oAUTH2 API"
-)
-
 access_token_schema = openapi.Schema(
     type=openapi.TYPE_STRING, description="Access token for authenticating API requests."
 )

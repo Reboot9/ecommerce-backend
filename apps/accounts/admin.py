@@ -28,11 +28,10 @@ class CustomUserAdmin(BaseUserAdmin):
         "is_staff",
         "is_superuser",
         "is_active",
-        "auth_provider",
     )
     search_fields = ("email", "first_name", "last_name")
-    ordering = ("email", "created_at", "updated_at", "auth_provider")
-    readonly_fields = ("created_at", "updated_at", "auth_provider")
+    ordering = ("email", "created_at", "updated_at")
+    readonly_fields = ("created_at", "updated_at")
     filter_horizontal = ("groups",)
     list_filter = ("is_active", "is_staff", "is_superuser")
 
@@ -56,7 +55,6 @@ class CustomUserAdmin(BaseUserAdmin):
         ("Permissions", {"fields": ("is_staff", "is_superuser", "groups")}),
         ("Important dates", {"fields": ("last_login",)}),
         ("Timestamps", {"fields": ("created_at", "updated_at")}),
-        ("Auth Provider", {"fields": ("auth_provider",)}),
     )
 
     # fields displayed on User creation
