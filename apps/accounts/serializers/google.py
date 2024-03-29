@@ -35,8 +35,8 @@ class GoogleSocialAuthSerializer(serializers.Serializer):
         #         "Try to authorize from unknown google client."
         #     )
 
-        first_name = user_data.get("first_name")
-        last_name = user_data.get("last_name")
+        first_name = user_data.get("given_name")
+        last_name = user_data.get("family_name")
         email = user_data.get("email")
         provider = "google"
 
