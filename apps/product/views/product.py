@@ -3,6 +3,7 @@ Module: views.py.
 
 This module contains handler for the product app.
 """
+from django.db.models import F
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.generics import ListAPIView, RetrieveAPIView
@@ -66,11 +67,14 @@ class ProductDetail(CategoryMixin, RetrieveAPIView):
 
 
 class ProductList(ListAPIView):
-    """Returns a list of products sorted by creation date(new ones at the beginning)."""
+    """Returns a list of products sorted by creation date in descending order."""
 
     serializer_class = ProductListSerializer
+    pagination_class = PaginationCommon
     queryset = (
-        Product.objects.prefetch_related("product_characteristics", "types_product", "images")
-        .select_related("manufacturer", "categories")
+        Product.objects.select_related("manufacturer", "categories")
+        .prefetch_related("product_characteristics", "types_product", "images")
+        .annotate(newest_first=F("created_at"))  # Add annotation for sorting
+        .order_by("-newest_first")  # Order by creation date descending
         .all()
     )
