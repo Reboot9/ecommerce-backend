@@ -15,7 +15,7 @@ from apps.product.models import Product
 from apps.product.serializers.product import ProductListSerializer, ProductDetailSerializer
 
 
-class ProductCategorytList(CategoryMixin, ListAPIView):
+class ProductCategoryList(CategoryMixin, ListAPIView):
     """
     Returns a list of products, filtered by categories.
 
