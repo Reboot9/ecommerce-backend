@@ -34,9 +34,9 @@ class Product(BaseID, BaseDate):
         verbose_name=_("Rating"),
         max_digits=3,  # 4.99 / 5
         decimal_places=2,
-        null=True,
-        blank=True,
-        help_text=_("This field allows empty value"),
+        default=0,
+        validators=[MinValueValidator(0), MaxValueValidator(5)],
+        help_text=_("Enter a rating between 0 and 5."),
     )
     discount_percentage = models.DecimalField(
         max_digits=5,
@@ -88,9 +88,9 @@ class Product(BaseID, BaseDate):
                 violation_error_message=_("Price must be positive or empty."),
             ),
             models.CheckConstraint(
-                name="rating_from_0_to_5_or_null",
-                check=Q(rating__gt=0) & Q(rating__lte=5) | Q(rating__isnull=True),
-                violation_error_message=_("Rating must be from 0 to 5 or null."),
+                name="rating_from_0_to_5",
+                check=Q(rating__gte=0) & Q(rating__lte=5),
+                violation_error_message=_("Rating must has to equal from 0 to 5."),
             ),
         ]
 
