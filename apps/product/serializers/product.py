@@ -16,7 +16,7 @@ class TypeProductCharacteristicsSerializer(serializers.ModelSerializer):
     """Serializer that used for TypeProductCharacteristics."""
 
     productCharacteristics = serializers.UUIDField(
-        source="product_characteristics.product_charactetistic", read_only=True
+        source="product_characteristics.product_characteristic", read_only=True
     )
     typeCharacteristic = serializers.CharField(source="type_characteristic", max_length=256)
 
