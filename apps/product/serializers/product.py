@@ -1,7 +1,5 @@
 """
-Module: image.py.
-
-This module defines the serializers for product models.
+Serializers related to Product model..
 """
 from rest_framework import serializers
 
@@ -16,7 +14,7 @@ class TypeProductCharacteristicsSerializer(serializers.ModelSerializer):
     """Serializer that used for TypeProductCharacteristics."""
 
     productCharacteristics = serializers.UUIDField(
-        source="product_characteristics.product_charactetistic", read_only=True
+        source="product_characteristics.product_characteristic", read_only=True
     )
     typeCharacteristic = serializers.CharField(source="type_characteristic", max_length=256)
 
@@ -72,4 +70,17 @@ class ProductDetailSerializer(ProductListSerializer):
         fields = [
             field for field in ProductListSerializer.Meta.fields if field != "descriptionShort"
         ] + ["manufacturer", "description", "images"]
+        read_only_fields = ProductListSerializer.Meta.fields
+
+
+class LiteProductSerializer(ProductListSerializer):
+    """Simplified version of product serializer to be used in pair with other serializers."""
+
+    class Meta(ProductListSerializer.Meta):
+        model = Product
+        fields = [
+            field
+            for field in ProductListSerializer.Meta.fields
+            if field not in ("descriptionShort", "typesProduct", "")
+        ]
         read_only_fields = ProductListSerializer.Meta.fields
