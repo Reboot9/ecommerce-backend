@@ -30,11 +30,11 @@ class DeliveryModelAdminForm(forms.ModelForm):
         """Clean method to validate fields based on the value of the 'option' field."""
         cleaned_data = super().clean()
 
-        if cleaned_data.get("option") == "C":
+        if cleaned_data.get("option") == Delivery.DeliveryOptionChoices.COURIER:
             for field in ("street", "house", "entrance", "time"):
                 if not cleaned_data.get(field):
                     self.add_error(field, "This field is required")
-        elif cleaned_data.get("option") == "D":
+        elif cleaned_data.get("option") == Delivery.DeliveryOptionChoices.DELIVERY:
             if not cleaned_data.get("department"):
                 self.add_error("department", "This field is required")
         return cleaned_data
