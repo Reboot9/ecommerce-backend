@@ -1,7 +1,5 @@
 """
-Module: cart.py.
-
-This module defines the serializer for cartitem models.
+Serializer for CartItem model.
 """
 from rest_framework import serializers
 
@@ -9,7 +7,7 @@ from apps.cart.models import CartItem
 
 
 class CartItemSerializer(serializers.ModelSerializer):
-    """Serializer for goods in Сart."""
+    """Serializer for goods in Cart."""
 
     cartID = serializers.UUIDField(read_only=True, source="cart_id")
     productID = serializers.UUIDField(required=True, source="product_id")

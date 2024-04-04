@@ -1,7 +1,5 @@
 """
-Module: urls.py.
-
-This module contains urls for the cart app.
+URLs for the cart app.
 """
 from django.urls import path, include
 from rest_framework.routers import SimpleRouter

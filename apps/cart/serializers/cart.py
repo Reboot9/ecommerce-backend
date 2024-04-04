@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
 from apps.cart.models import Cart
-from apps.cart.serializers.cartitem import CartItemSerializer
+from apps.cart.serializers.cart_item import CartItemSerializer
 from apps.cart.services.cart import create_or_update_cart, update_cart
 
 User = get_user_model()
