@@ -1,6 +1,7 @@
 """
 This module contains handlers for the order app.
 """
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, permissions
 
 from apps.order.models.order import Order
@@ -23,11 +24,13 @@ class OrderViewSet(viewsets.ModelViewSet):
             return [permissions.AllowAny()]
 
     def get_queryset(self):
-        """Get orders based on the action and user."""
+        """Get orders based on the user's email."""
         user = self.request.user
-        if self.action == "list":
-            # Filter orders for listing based on the user's email.
-            return Order.objects.filter(email=user.email)
-        elif self.action == "retrieve":
-            # Filter single order retrieval based on the user's email and order ID.
-            return Order.objects.filter(email=user.email, pk=self.kwargs["pk"])
+        return Order.objects.filter(email=user.email)
+
+    def get_object(self):
+        """
+        Retrieve a single order based on the user and order ID.
+        """
+        user = self.request.user
+        return get_object_or_404(Order, email=user.email, pk=self.kwargs.get("pk"))
