@@ -41,7 +41,7 @@ class CartItem(BaseID, BaseDate):
 
         Or when the object needs to be represented as a string
         """
-        return f"{self.product}, price - {self.price}"
+        return f"CartItem for {self.product} for {self.cart}, " f"price - {self.price}"
 
     @property
     def cost(self) -> decimal.Decimal:
