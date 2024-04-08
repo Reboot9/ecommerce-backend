@@ -23,7 +23,7 @@ class CartSerializer(serializers.ModelSerializer):
         decimal_places=2,
         read_only=True,
     )
-    userID = serializers.IntegerField(source="user_id", read_only=True)
+    userID = serializers.UUIDField(source="user__pk", read_only=True)
     items = CartItemSerializer(many=True)
 
     class Meta:
