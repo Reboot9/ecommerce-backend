@@ -10,7 +10,8 @@ from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.translation import ngettext
 
-from apps.product.models import Manufacturer, Category, Image
+from apps.product.filters.category import BaseSubcategoryFilter, ProductSubcategoryFilter
+from apps.product.models import Manufacturer, Category, ProductImage
 from apps.product.models.product import ProductCharacteristics, TypeProductCharacteristics, Product
 
 
@@ -35,7 +36,7 @@ class ProductCharacteristicsInline(admin.TabularInline):
 class ImageInline(admin.TabularInline):
     """Inline admin class for Image related to Product."""
 
-    model = Image
+    model = ProductImage
     extra = 2
     verbose_name = "Additional image"
     verbose_name_plural = "Additional images"
@@ -79,11 +80,16 @@ class ProductAdmin(admin.ModelAdmin):
         "categories__name",
     )
     search_help_text = (
-        "In this field you can search by such fields: name,"
-        " product code, slug, manufacturer, categories"
+        "You can search for instances by product name, " "code, slug, manufacturer or category"
     )
     autocomplete_fields = ("manufacturer", "categories")
-    list_filter = ("stock", "discount_percentage", "created_at", "updated_at")
+    list_filter = (
+        "stock",
+        "discount_percentage",
+        ProductSubcategoryFilter,
+        "created_at",
+        "updated_at",
+    )
     list_editable = ("price", "discount_percentage", "stock")
     prepopulated_fields = {"slug": ("name", "product_code")}
     actions = ("remove_discount",)
@@ -102,7 +108,7 @@ class ProductCharacteristicsAdmin(admin.ModelAdmin):
     list_display = ("product_characteristic", "created_at", "updated_at")
     readonly_fields = ("created_at", "updated_at")
     search_fields = ("product_characteristic",)
-    search_help_text = "In this field you can search by such fields: product characteristic"
+    search_help_text = "You can search for instances by product characteristic"
     list_filter = ("created_at", "updated_at")
     filter_horizontal = ("product", "categories")
     list_per_page = 10
@@ -116,7 +122,7 @@ class TypeProductCharacteristicsAdmin(admin.ModelAdmin):
     list_select_related = ("product_characteristics",)
     readonly_fields = ("created_at", "updated_at")
     search_fields = ("type_characteristic",)
-    search_help_text = "In this field you can search by such fields: type characteristic"
+    search_help_text = "You can search for instances by type characteristic"
     list_filter = ("created_at", "updated_at")
     filter_horizontal = ("product",)
     list_per_page = 10
@@ -136,7 +142,7 @@ class ManufacturerAdmin(admin.ModelAdmin):
     )
     readonly_fields = ("created_at", "updated_at")
     search_fields = ("trade_brand", "country")
-    search_help_text = "In this field you can search by such fields: trade brand, country"
+    search_help_text = "You can search for instances by trade brand, country"
     list_filter = ("created_at", "updated_at")
     list_per_page = 10
     list_max_show_all = 100
@@ -148,7 +154,10 @@ class CategoryAdmin(admin.ModelAdmin):
     list_display = ("__str__", "slug", "parent_link", "level", "created_at", "updated_at")
     prepopulated_fields = {"slug": ("name",)}
     search_fields = ("name", "slug")
-    list_filter = ("level",)
+    list_filter = (
+        "level",
+        BaseSubcategoryFilter,
+    )
     ordering = ("level", "created_at")
     readonly_fields = ("created_at", "updated_at")
     list_select_related = ("parent",)
@@ -187,13 +196,13 @@ class CategoryAdmin(admin.ModelAdmin):
         return form
 
 
-class ImageAdmin(admin.ModelAdmin):
-    """Admin class for Image model."""
+class ProductImageAdmin(admin.ModelAdmin):
+    """Admin class for ProductImage model."""
 
     list_display = ("image", "product", "created_at", "updated_at")
     readonly_fields = ("created_at", "updated_at")
     search_fields = ("product__name",)
-    search_help_text = "In this field you can search by such fields: product name"
+    search_help_text = "You can search images by product name"
     list_filter = ("created_at", "updated_at")
     list_per_page = 10
     list_max_show_all = 100
@@ -205,4 +214,4 @@ admin.site.register(ProductCharacteristics, ProductCharacteristicsAdmin)
 admin.site.register(TypeProductCharacteristics, TypeProductCharacteristicsAdmin)
 admin.site.register(Manufacturer, ManufacturerAdmin)
 admin.site.register(Category, CategoryAdmin)
-admin.site.register(Image, ImageAdmin)
+admin.site.register(ProductImage, ProductImageAdmin)
