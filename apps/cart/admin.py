@@ -31,8 +31,8 @@ class CartAdmin(admin.ModelAdmin):
         "is_active",
     )
     readonly_fields = ("created_at", "updated_at")
-    search_fields = ("user",)
-    search_help_text = "In this field you can search by such fields: user"
+    search_fields = ("user__email",)
+    search_help_text = "Search by user email"
     list_filter = ("is_active", "created_at", "updated_at")
     list_per_page = 10
     list_max_show_all = 100
@@ -46,15 +46,15 @@ class CartItemAdmin(admin.ModelAdmin):
         "cart",
         "product",
         "quantity",
-        "price",
-        "discount_percentage",
+        # "price",
+        # "discount_percentage",
         "cost",
     )
     readonly_fields = ("created_at", "updated_at")
     list_select_related = ("cart",)
     autocomplete_fields = ("product", "cart")
-    search_fields = ("product", "cart")
-    search_help_text = "In this field you can search by such fields: product, cart"
+    search_fields = ("product__name", "cart")
+    search_help_text = "Search by product name, cart"
     list_filter = ("created_at", "updated_at")
     list_per_page = 10
     list_max_show_all = 100
