@@ -37,7 +37,8 @@ def create_or_add_cart_item(
 ) -> CartItem:
     """Create a new items or update items and return it."""
     cart_item, created = CartItem.objects.get_or_create(
-        cart=cart, product_id=product_id, price=price, discount_percentage=discount_percentage
+        cart=cart,
+        product_id=product_id,
     )
     if not created:
         cart_item.quantity += 1
