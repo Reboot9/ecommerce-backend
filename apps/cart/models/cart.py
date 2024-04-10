@@ -59,7 +59,9 @@ class Cart(BaseID, BaseDate):
         total_price = self.items.aggregate(
             total_price=Sum(
                 ExpressionWrapper(
-                    F("quantity") * F("price") * ((100 - F("discount_percentage")) / 100),
+                    F("quantity")
+                    * F("product__price")
+                    * ((100 - F("product__discount_percentage")) / 100),
                     output_field=DecimalField(),
                 )
             )
