@@ -1,7 +1,5 @@
 """
-Module: cart.py.
-
-This module defines the Cart model for the cart app.
+Cart related models for the cart app.
 """
 from decimal import Decimal, ROUND_HALF_UP
 
