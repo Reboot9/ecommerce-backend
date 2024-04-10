@@ -7,7 +7,6 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from apps.cart.models import Cart
-from apps.cart.services.cart import deactivate_cart
 from apps.order.models.order import Order
 
 User = get_user_model()
@@ -27,8 +26,7 @@ def delete_cart_after_order(sender, instance, created, **kwargs):
     if created:
         try:
             user = User.objects.get(email=instance.email)
-            cart = Cart.objects.get(user=user, is_active=True)
-            deactivate_cart(cart)
+            cart = Cart.objects.get(user=user, is_active=True).update(is_active=False)  # noqa: F841
         except ObjectDoesNotExist:
             pass  # Cart or user not found, this is possible in two cases:
             # if the user is not registered
