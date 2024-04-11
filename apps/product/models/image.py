@@ -1,7 +1,5 @@
 """
-Module: image.py.
-
-This module defines the Image model for the product app.
+Definition of the ProductImage model for the product app.
 """
 
 from django.db import models
@@ -11,8 +9,8 @@ from apps.base.models import BaseDate, BaseID
 from apps.product.models.product import Product
 
 
-class Image(BaseID, BaseDate):
-    """Model representing an image ."""
+class ProductImage(BaseID, BaseDate):
+    """Model representing an Additional Image of the Product."""
 
     product = models.ForeignKey(
         to=Product,
@@ -23,5 +21,5 @@ class Image(BaseID, BaseDate):
 
     class Meta:
         db_table = "image"
-        verbose_name = _("Image")
-        verbose_name_plural = _("Images")
+        verbose_name = _("Additional Product Image")
+        verbose_name_plural = _("Additional Product Images")

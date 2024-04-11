@@ -6,13 +6,15 @@ from rest_framework import serializers
 
 from apps.cart.models import CartItem
 from apps.product.models import Product
+from apps.product.serializers.product import LiteProductSerializer
 
 
 class CartItemSerializer(serializers.ModelSerializer):
     """Serializer for goods in Cart."""
 
-    cartID = serializers.UUIDField(read_only=True, source="cart.id")
-    productID = serializers.UUIDField(required=False, source="product.id")
+    # cartID = serializers.UUIDField(read_only=True, source="cart.id")
+    # productID = serializers.UUIDField(required=False, source="product.id")
+    product = LiteProductSerializer(read_only=True)
     discountPercentage = serializers.DecimalField(
         source="product.discount_percentage",
         max_digits=5,
@@ -33,14 +35,14 @@ class CartItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CartItem
-        fields = ["id", "cartID", "productID", "quantity", "price", "discountPercentage", "cost"]
-        read_only_fields = ["id", "cartID", "price", "discountPercentage", "cost"]
+        fields = ["id", "product", "quantity", "price", "discountPercentage", "cost"]
+        read_only_fields = ["id", "price", "discountPercentage", "cost"]
 
     def __init__(self, *args, **kwargs):
         """If object is being updated don't allow contact to be changed."""
         super().__init__(*args, **kwargs)
         if self.instance is not None:
-            self.fields.get("productID").read_only = True
+            self.fields.get("product").read_only = True
             self.fields.get("price").read_only = True
 
     def create(self, validated_data):

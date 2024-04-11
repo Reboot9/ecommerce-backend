@@ -52,7 +52,6 @@ LOCAL_APPS = [
     "apps.product.apps.ProductConfig",
     "apps.order.apps.OrderConfig",
     "apps.cart.apps.CartConfig",
-    # "apps.warehouse.apps.WarehouseConfig",
 ]
 
 # External packages or libraries integrated into project.

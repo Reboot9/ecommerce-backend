@@ -28,7 +28,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     # app endpoints
     path("api/", include("apps.accounts.urls", namespace="accounts")),
-    path("api/", include("apps.product.urls", namespace="product")),
+    path("api/shop", include("apps.product.urls", namespace="product")),
     path("api/", include("apps.order.urls", namespace="order")),
     path("api/", include("apps.cart.urls", namespace="cart")),
     # JWT token endpoints
