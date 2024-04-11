@@ -1,8 +1,8 @@
 """
 Serializer for CartItem model.
 """
-from django.shortcuts import get_object_or_404
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from apps.cart.models import CartItem
 from apps.product.models import Product
@@ -14,6 +14,9 @@ class CartItemSerializer(serializers.ModelSerializer):
 
     # cartID = serializers.UUIDField(read_only=True, source="cart.id")
     # productID = serializers.UUIDField(required=False, source="product.id")
+    productID = serializers.PrimaryKeyRelatedField(
+        queryset=Product.objects.all(), required=False, write_only=True
+    )
     product = LiteProductSerializer(read_only=True)
     discountPercentage = serializers.DecimalField(
         source="product.discount_percentage",
@@ -35,7 +38,7 @@ class CartItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CartItem
-        fields = ["id", "product", "quantity", "price", "discountPercentage", "cost"]
+        fields = ["id", "product", "productID", "quantity", "price", "discountPercentage", "cost"]
         read_only_fields = ["id", "price", "discountPercentage", "cost"]
 
     def __init__(self, *args, **kwargs):
@@ -52,14 +55,27 @@ class CartItemSerializer(serializers.ModelSerializer):
         :param validated_data: validated data containing info about cart item.
         :return: newly created CartItem instance.
         """
-        product_id = validated_data.get("product__id")
-        product = get_object_or_404(Product, id=product_id)
+        cart = self.context["cart"]
 
-        cart_item = CartItem.objects.create(
-            product=product,
-            cart=self.context["cart"],
-            quantity=validated_data["quantity"],
-        )
+        # Extract productID from validated data
+        product_id = validated_data.get("productID")
+        quantity = validated_data.get("quantity", 1)
+
+        if not product_id:
+            raise ValidationError("productID is required when creating CartItem instance.")
+
+        # Check if a cart item with the same product already exists in the cart
+        existing_cart_item = CartItem.objects.filter(cart=cart, product=product_id).first()
+
+        if existing_cart_item:
+            # If the item already exists, update its quantity
+            existing_cart_item.quantity += quantity
+            existing_cart_item.save()
+
+            return existing_cart_item
+        else:
+            # If the item does not exist, create a new cart item
+            cart_item = CartItem.objects.create(product=product_id, cart=cart, quantity=quantity)
 
         return cart_item
 

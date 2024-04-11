@@ -65,7 +65,7 @@ class CartItemViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin):
         :return: HTTP response with updated CartItem data or error.
         """
         instance = self.get_object()
-        serializer = CartItemSerializer(instance, data=request.data)
+        serializer = CartItemSerializer(instance, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
