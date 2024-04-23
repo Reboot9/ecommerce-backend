@@ -105,10 +105,10 @@ class ProductAdmin(admin.ModelAdmin):
 class ProductCharacteristicsAdmin(admin.ModelAdmin):
     """Admin class for ProductCharacteristics model."""
 
-    list_display = ("product_characteristic", "created_at", "updated_at")
+    list_display = ("name", "created_at", "updated_at")
     readonly_fields = ("created_at", "updated_at")
-    search_fields = ("product_characteristic",)
-    search_help_text = "You can search for instances by product characteristic"
+    search_fields = ("name",)
+    search_help_text = "You can search for instances by name of product characteristic"
     list_filter = ("created_at", "updated_at")
     filter_horizontal = ("product", "categories")
     list_per_page = 10
@@ -118,11 +118,11 @@ class ProductCharacteristicsAdmin(admin.ModelAdmin):
 class TypeProductCharacteristicsAdmin(admin.ModelAdmin):
     """Admin class for TypeProductCharacteristics model."""
 
-    list_display = ("type_characteristic", "product_characteristics", "created_at", "updated_at")
+    list_display = ("name", "product_characteristics", "created_at", "updated_at")
     list_select_related = ("product_characteristics",)
     readonly_fields = ("created_at", "updated_at")
-    search_fields = ("type_characteristic",)
-    search_help_text = "You can search for instances by type characteristic"
+    search_fields = ("name",)
+    search_help_text = "You can search for instances by name of type characteristic"
     list_filter = ("created_at", "updated_at")
     filter_horizontal = ("product",)
     list_per_page = 10

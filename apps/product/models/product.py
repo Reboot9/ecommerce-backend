@@ -126,9 +126,7 @@ class ProductCharacteristics(BaseID, BaseDate):
     For example: weight, feed class.
     """
 
-    product_characteristic = models.CharField(
-        max_length=256, verbose_name=_("Product characteristics"), unique=True
-    )
+    name = models.CharField(max_length=256, verbose_name=_("Product characteristic"), unique=True)
     categories = models.ManyToManyField(
         to=Category,
         db_table="category characteristic m2m",
@@ -152,7 +150,7 @@ class ProductCharacteristics(BaseID, BaseDate):
 
         Or when the object needs to be represented as a string
         """
-        return f"{self.product_characteristic}"
+        return f"{self.name}"
 
 
 class TypeProductCharacteristics(BaseID, BaseDate):
@@ -162,8 +160,8 @@ class TypeProductCharacteristics(BaseID, BaseDate):
     feed class - premium, weight - 1.5kg.
     """
 
-    type_characteristic = models.CharField(
-        max_length=256, verbose_name=_("Type of product characteristics"), unique=True
+    name = models.CharField(
+        max_length=256, verbose_name=_("Type of product characteristic"), unique=True
     )
     product = models.ManyToManyField(
         to=Product, db_table="type product m2m", related_name="types_product", blank=True
@@ -182,4 +180,4 @@ class TypeProductCharacteristics(BaseID, BaseDate):
 
         Or when the object needs to be represented as a string.
         """
-        return f"{self.type_characteristic}"
+        return f"{self.name}"

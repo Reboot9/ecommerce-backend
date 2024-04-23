@@ -1,5 +1,5 @@
 """
-Serializers related to Product model..
+Serializers related to Product model.
 """
 from rest_framework import serializers
 
@@ -14,9 +14,9 @@ class TypeProductCharacteristicsSerializer(serializers.ModelSerializer):
     """Serializer that used for TypeProductCharacteristics."""
 
     productCharacteristics = serializers.UUIDField(
-        source="product_characteristics.product_characteristic", read_only=True
+        source="product_characteristics.name", read_only=True
     )
-    typeCharacteristic = serializers.CharField(source="type_characteristic", max_length=256)
+    typeCharacteristic = serializers.CharField(source="name", max_length=256)
 
     class Meta:
         model = TypeProductCharacteristics
