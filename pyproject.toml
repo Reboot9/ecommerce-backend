@@ -20,6 +20,8 @@ drf-yasg = "^1.21.7"
 django-redis = "^5.4.0"
 pillow = "^10.1.0"
 django-filter = "^23.5"
+dicttoxml = "^1.7.16"
+djangorestframework-xml = "^2.0.0"
 
 [tool.ruff]
 # Set the maximum line length

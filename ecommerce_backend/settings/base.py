@@ -50,7 +50,9 @@ DJANGO_APPS = [
 LOCAL_APPS = [
     "apps.accounts.apps.AccountsConfig",
     "apps.product.apps.ProductConfig",
-    # "apps.warehouse.apps.WarehouseConfig",
+    "apps.order.apps.OrderConfig",
+    "apps.warehouse.apps.WarehouseConfig",
+    "apps.cart.apps.CartConfig",
 ]
 
 # External packages or libraries integrated into project.

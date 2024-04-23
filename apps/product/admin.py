@@ -80,7 +80,7 @@ class ProductAdmin(admin.ModelAdmin):
         "categories__name",
     )
     search_help_text = (
-        "You can search for instances by product name, " "code, slug, manufacturer or category"
+        "You can search for instances by product name, code, slug, manufacturer or category"
     )
     autocomplete_fields = ("manufacturer", "categories")
     list_filter = (

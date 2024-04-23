@@ -1,0 +1,25 @@
+/* Appearance of the datepicker for dark theme */
+.ui-datepicker-dark .ui-datepicker-header {
+  background: #333;
+  color: #fff;
+}
+.ui-datepicker-dark .ui-state-default {
+  background: #666;
+  color: #fff;
+}
+.ui-datepicker-dark .ui-state-default:hover {
+  background: #999;
+}
+
+/* Appearance of the datepicker for light theme */
+.ui-datepicker-light .ui-datepicker-header {
+  background: #fff;
+  color: #333;
+}
+.ui-datepicker-light .ui-state-default {
+  background: #f5f5f5;
+  color: #333;
+}
+.ui-datepicker-light .ui-state-default:hover {
+  background: #e5e5e5;
+}
