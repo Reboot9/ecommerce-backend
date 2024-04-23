@@ -35,7 +35,10 @@ class Product(BaseID, BaseDate):
         max_digits=3,  # 4.99 / 5
         decimal_places=2,
         default=0,
-        validators=[MinValueValidator(0), MaxValueValidator(5)],
+        validators=[
+            MinValueValidator(0, message="Rating cannot be less than 0"),
+            MaxValueValidator(5, message="Rating cannot be more than 5"),
+        ],
         help_text=_("Enter a rating between 0 and 5."),
     )
     discount_percentage = models.DecimalField(
