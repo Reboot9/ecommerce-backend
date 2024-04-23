@@ -7,7 +7,7 @@ from rest_framework.response import Response
 
 from apps.cart.models import Cart
 from apps.cart.serializers import CartSerializer
-from apps.cart.services.cart import deactivate_cart
+from apps.cart.services.cart import deactivate_empty_cart
 
 
 class CartViewSet(viewsets.ModelViewSet):
@@ -80,5 +80,5 @@ class CartViewSet(viewsets.ModelViewSet):
         :param kwargs: Additional keyword arguments.
         """
         instance = self.get_object()
-        deactivate_cart(instance)
+        deactivate_empty_cart(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
