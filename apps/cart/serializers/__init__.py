@@ -1,4 +1,5 @@
-from .cart import CartSerializer, CartItemSerializer
+from apps.cart.serializers.cart import CartSerializer
+from apps.cart.serializers.cart_item import CartItemSerializer
 
 
-__all__ = [CartSerializer, CartItemSerializer]
+__all__ = ["CartSerializer", "CartItemSerializer"]

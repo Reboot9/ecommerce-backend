@@ -1,18 +1,18 @@
 """
-Module: urls.py.
-
-This module contains urls for the order app.
+URLs for the order app.
 """
 from django.urls import path, include
 from rest_framework.routers import SimpleRouter
 
 from apps.order.views.order import OrderViewSet
+from apps.order.views.order_item import OrderItemViewSet
 
-order_router = SimpleRouter()
-order_router.register(prefix="orders", viewset=OrderViewSet, basename="orders")
+router = SimpleRouter()
+router.register(r"orders", OrderViewSet, basename="orders")
+router.register(r"orders/(?P<order_id>[^/.]+)/items", OrderItemViewSet, basename="order-items")
 
 app_name = "order"
 
 urlpatterns = [
-    path("", include(order_router.urls)),
+    path("", include(router.urls)),
 ]

@@ -1,8 +1,7 @@
 """
-Module: views.py.
-
-This module contains handler for the order app.
+This module contains handlers for the order app.
 """
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, permissions
 
 from apps.order.models.order import Order
@@ -16,17 +15,22 @@ class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer
 
     def get_permissions(self):
-        """Use different permissions."""
-        if self.action in {"list", "retrieve"}:
-            permission_classes = [permissions.IsAuthenticated]
+        """Set permissions based on the action."""
+        if self.action in ["list", "retrieve"]:
+            # Allow access only to authenticated users for listing and retrieving orders.
+            return [permissions.IsAuthenticated()]
         else:
-            permission_classes = [permissions.AllowAny]
-        return [permission() for permission in permission_classes]
+            # Allow any user to perform other actions.
+            return [permissions.AllowAny()]
 
     def get_queryset(self):
-        """Different filters require different sets of queries."""
+        """Get orders based on the user's email."""
         user = self.request.user
-        if self.action == "list":
-            return Order.objects.filter(email=user.email)
-        if self.action in {"retrieve"}:
-            return Order.objects.filter(email=user.email, pk=self.kwargs["pk"])
+        return Order.objects.filter(email=user.email)
+
+    def get_object(self):
+        """
+        Retrieve a single order based on the user and order ID.
+        """
+        user = self.request.user
+        return get_object_or_404(Order, email=user.email, pk=self.kwargs.get("pk"))

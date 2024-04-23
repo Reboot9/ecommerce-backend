@@ -1,7 +1,5 @@
 """
-Module: cart.py.
-
-This module defines the Cart model for the cart app.
+Cart related models for the cart app.
 """
 from decimal import Decimal, ROUND_HALF_UP
 
@@ -59,7 +57,9 @@ class Cart(BaseID, BaseDate):
         total_price = self.items.aggregate(
             total_price=Sum(
                 ExpressionWrapper(
-                    F("quantity") * F("price") * ((100 - F("discount_percentage")) / 100),
+                    F("quantity")
+                    * F("product__price")
+                    * ((100 - F("product__discount_percentage")) / 100),
                     output_field=DecimalField(),
                 )
             )
