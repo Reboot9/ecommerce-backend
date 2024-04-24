@@ -3,6 +3,7 @@ Module: product.py.
 
 This module defines the Product model for the product app.
 """
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.db.models import Q
@@ -103,6 +104,21 @@ class Product(BaseID, BaseDate):
         Or when the object needs to be represented as a string
         """
         return f"{self.name}-{self.product_code}"
+
+    def clean(self):
+        """
+        Clean method to ensure that a product has required associations.
+
+        Ensuring that a product has at least one product characteristic and is associated with
+        at least one type of product characteristic.
+        """
+        super().clean()
+        if not self.product_characteristics.exists():
+            raise ValidationError(_("A product must have at least one product characteristic."))
+        if not self.types_product.exists():
+            raise ValidationError(
+                _("A product must be associated with at least one type of product characteristic.")
+            )
 
     @property
     def price_discount(self):
