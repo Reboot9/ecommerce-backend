@@ -3,13 +3,13 @@ Module: product.py.
 
 This module defines the Product model for the product app.
 """
-from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
 from apps.base.models import BaseDate, BaseID
+from apps.base.validators import special_characters_validator
 from apps.product.models.category import Category
 from apps.product.models.manufacturer import Manufacturer
 
@@ -59,7 +59,12 @@ class Product(BaseID, BaseDate):
         blank=True,
         help_text=_("This field allows empty value"),
     )
-    product_code = models.CharField(max_length=256, verbose_name=_("Product code"), unique=True)
+    product_code = models.CharField(
+        max_length=256,
+        verbose_name=_("Product code"),
+        unique=True,
+        validators=[special_characters_validator],
+    )
     stock = models.CharField(
         verbose_name=_("Stock"),
         max_length=1,
@@ -105,20 +110,21 @@ class Product(BaseID, BaseDate):
         """
         return f"{self.name}-{self.product_code}"
 
-    def clean(self):
-        """
-        Clean method to ensure that a product has required associations.
-
-        Ensuring that a product has at least one product characteristic and is associated with
-        at least one type of product characteristic.
-        """
-        super().clean()
-        if not self.product_characteristics.exists():
-            raise ValidationError(_("A product must have at least one product characteristic."))
-        if not self.types_product.exists():
-            raise ValidationError(
-                _("A product must be associated with at least one type of product characteristic.")
-            )
+    # def clean(self):
+    #     """
+    #     Clean method to ensure that a product has required associations.
+    #
+    #     Ensuring that a product has at least one product characteristic and is associated with
+    #     at least one type of product characteristic.
+    #     """
+    #     super().clean()
+    #     if not self.product_characteristics.exists():
+    #         raise ValidationError(_("A product must have at least one product characteristic."))
+    #     if not self.types_product.exists():
+    #         raise ValidationError(
+    #             _("A product must be associated with at least one type of
+    #             product characteristic.")
+    #         )
 
     @property
     def price_discount(self):

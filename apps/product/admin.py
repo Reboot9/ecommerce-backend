@@ -6,6 +6,8 @@ This module contains the admin configurations for the product app.
 
 from django.contrib import admin
 from django.contrib import messages
+from django.core.exceptions import ValidationError
+from django.forms import BaseInlineFormSet
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.translation import ngettext
@@ -15,6 +17,25 @@ from apps.product.models import Manufacturer, Category, ProductImage
 from apps.product.models.product import ProductCharacteristics, TypeProductCharacteristics, Product
 
 
+class BaseProductInlineFormSet(BaseInlineFormSet):
+    """
+    Subclass of BaseInlineFormSet for handling inline forms related to product entries.
+    """
+
+    def clean(self):
+        """
+        Overriding clean method to enforce that at least one entry is required.
+        """
+        super().clean()
+        has_entries = False
+        for form in self.forms:
+            if form.cleaned_data and not form.cleaned_data.get("DELETE", False):
+                has_entries = True
+                break
+        if not has_entries:
+            raise ValidationError("At least one entry is required.")
+
+
 class TypeProductCharacteristicsInline(admin.TabularInline):
     """Inline class for TypeProductCharacteristics related to Product."""
 
@@ -22,6 +43,7 @@ class TypeProductCharacteristicsInline(admin.TabularInline):
     extra = 1
     verbose_name = "Type of product characteristic"
     verbose_name_plural = "Type of product characteristics"
+    formset = BaseProductInlineFormSet
 
 
 class ProductCharacteristicsInline(admin.TabularInline):
@@ -31,6 +53,7 @@ class ProductCharacteristicsInline(admin.TabularInline):
     extra = 1
     verbose_name = "Product Characteristic"
     verbose_name_plural = "Product Characteristics"
+    formset = BaseProductInlineFormSet
 
 
 class ImageInline(admin.TabularInline):
