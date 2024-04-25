@@ -3,9 +3,10 @@ Admin related classes and function that can be used in any part of the project.
 """
 from django.contrib import admin
 from django.db.models import Case, When, Value
+from django.utils.translation import gettext_lazy as _
 
 
-@admin.action(description="Toggle is_active status for selected entries")
+@admin.action(description=_("Toggle is_active status for selected entries"))
 def toggle_is_active(modeladmin, request, queryset):
     """
     Custom action to toggle is_active status of queryset.
@@ -24,14 +25,16 @@ def toggle_is_active(modeladmin, request, queryset):
         )
         modeladmin.message_user(
             request,
-            f"{updated_count} "
-            f"{'entry was' if updated_count == 1 else 'entries were'} "
-            f"toggled.",
+            _(
+                f"{updated_count} "
+                f"{'entry was' if updated_count == 1 else 'entries were'} "
+                f"toggled."
+            ),
             level="SUCCESS",
         )
     else:
         modeladmin.message_user(
             request,
-            "This model does not have the 'is_active' field.",
+            _("This model does not have the 'is_active' field."),
             level="ERROR",
         )
