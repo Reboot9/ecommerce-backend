@@ -7,7 +7,6 @@ import json
 
 from django.contrib import admin
 from django.contrib import messages
-from django.db.models import Case, Value, When
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.urls import reverse
@@ -16,6 +15,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework.renderers import JSONRenderer
 from rest_framework_xml.renderers import XMLRenderer
 
+from apps.base.admin import toggle_is_active
 from apps.warehouse.filters.category import WarehouseSubcategoryFilter
 from apps.warehouse.forms import WarehouseTransactionForm
 from apps.warehouse.models import (
@@ -26,31 +26,6 @@ from apps.warehouse.models import (
 )
 from apps.warehouse.serializers.warehouse import WarehouseSerializer
 from apps.warehouse.utils import calculate_total_quantities
-
-
-@admin.action(description="Toggle selected is_active status")
-def toggle_is_active(modeladmin, request, queryset):
-    """
-    Custom action to toggle is_active status of queryset.
-
-    :param modeladmin: The ModelAdmin instance.
-    :param request: The current HTTP request.
-    :param queryset: The queryset containing the selected entries.
-    :return: None because this function updates the queryset in place.
-    """
-    updated_count = queryset.update(
-        is_active=Case(
-            When(is_active=True, then=Value(False)),
-            default=Value(True),
-        )
-    )
-    modeladmin.message_user(
-        request,
-        f"{updated_count} "
-        f"{'entry was' if updated_count == 1 else 'entries were'} "
-        f"toggled.",
-        level="SUCCESS",
-    )
 
 
 @admin.action(description="Generate report for chosen items at the Warehouse")
