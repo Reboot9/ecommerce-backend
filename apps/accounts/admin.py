@@ -10,6 +10,8 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from apps.accounts.models import CustomUser
 from apps.accounts.forms import CustomUserCreationForm
+from apps.base.admin import toggle_is_active
+from django.utils.translation import gettext_lazy as _
 
 
 @admin.register(CustomUser)
@@ -19,7 +21,7 @@ class CustomUserAdmin(BaseUserAdmin):
     """
 
     add_form = CustomUserCreationForm
-    list_display = (
+    list_display = [
         "email",
         "first_name",
         "last_name",
@@ -28,12 +30,18 @@ class CustomUserAdmin(BaseUserAdmin):
         "is_staff",
         "is_superuser",
         "is_active",
-    )
+    ]
     search_fields = ("email", "first_name", "last_name")
     ordering = ("email", "created_at", "updated_at")
     readonly_fields = ("created_at", "updated_at")
-    filter_horizontal = ("groups",)
-    list_filter = ("is_active", "is_staff", "is_superuser")
+    filter_horizontal = [
+        "groups",
+    ]
+    list_filter = ["is_active", "is_staff", "is_superuser"]
+    actions = [toggle_is_active]
+    list_editable = [
+        "is_active",
+    ]
 
     def get_readonly_fields(self, request, obj=None) -> Union[Tuple[str, ...], List[str]]:
         """
@@ -51,10 +59,16 @@ class CustomUserAdmin(BaseUserAdmin):
 
     fieldsets = (
         (None, {"fields": ("email", "password")}),
-        ("Personal Info", {"fields": ("first_name", "last_name")}),
-        ("Permissions", {"fields": ("is_staff", "is_superuser", "groups")}),
-        ("Important dates", {"fields": ("last_login",)}),
-        ("Timestamps", {"fields": ("created_at", "updated_at")}),
+        (_("Personal Info"), {"fields": ("first_name", "last_name")}),
+        (_("Permissions"), {"fields": ("is_staff", "is_superuser", "groups")}),
+        (_("Important dates"), {"fields": ("last_login",)}),
+        (
+            _("Timestamps"),
+            {
+                "fields": ("created_at", "updated_at"),
+                "classes": ("collapse",),
+            },
+        ),
     )
 
     # fields displayed on User creation
@@ -63,7 +77,14 @@ class CustomUserAdmin(BaseUserAdmin):
             None,
             {
                 "classes": ("wide",),
-                "fields": ("email", "password1", "password2", "is_staff", "is_superuser"),
+                "fields": (
+                    "email",
+                    "password1",
+                    "password2",
+                    "is_staff",
+                    "is_superuser",
+                    "is_active",
+                ),
             },
         ),
     )

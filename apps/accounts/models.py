@@ -54,7 +54,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     providing a customizable user model for authentication and permission management.
     """
 
-    email = models.EmailField(unique=True)
+    email = models.EmailField(
+        max_length=255,
+        unique=True,
+    )
     first_name = models.CharField(max_length=30, blank=True)
     last_name = models.CharField(max_length=30, blank=True)
     is_active = models.BooleanField(default=True)
@@ -80,7 +83,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
         :return: The user's email address.
         """
-        return f"{self.email}"
+        return f"User {self.email}"
 
     @property
     def get_full_name(self) -> str:
