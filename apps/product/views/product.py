@@ -16,7 +16,7 @@ from apps.product.models import Product
 from apps.product.serializers.product import ProductListSerializer, ProductDetailSerializer
 
 
-class ProductCategoryList(CategoryMixin, CachedListView, ListAPIView):
+class ProductCategoryListView(CategoryMixin, CachedListView, ListAPIView):
     """
     Returns a list of products, filtered by categories.
 
@@ -55,7 +55,7 @@ class ProductCategoryList(CategoryMixin, CachedListView, ListAPIView):
         )
 
 
-class ProductDetail(CategoryMixin, CachedRetrieveView, RetrieveAPIView):
+class ProductDetailView(CategoryMixin, CachedRetrieveView, RetrieveAPIView):
     """Returns one product."""
 
     serializer_class = ProductDetailSerializer
@@ -79,7 +79,7 @@ class ProductDetail(CategoryMixin, CachedRetrieveView, RetrieveAPIView):
         )
 
 
-class ProductList(ListAPIView):
+class ProductListView(ListAPIView):
     """Returns a list of products sorted by creation date in descending order."""
 
     serializer_class = ProductListSerializer

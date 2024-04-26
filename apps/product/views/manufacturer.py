@@ -9,7 +9,7 @@ from apps.product.models import Manufacturer
 from apps.product.serializers.manufacturer import ManufacturerSerializer
 
 
-class ManufacturerList(ListAPIView):
+class ManufacturerListView(ListAPIView):
     """Returns a list of manufacturer."""
 
     serializer_class = ManufacturerSerializer
