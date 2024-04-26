@@ -53,6 +53,7 @@ LOCAL_APPS = [
     "apps.order.apps.OrderConfig",
     "apps.warehouse.apps.WarehouseConfig",
     "apps.cart.apps.CartConfig",
+    "apps.payment.apps.PaymentConfig",
 ]
 
 # External packages or libraries integrated into project.
@@ -184,3 +185,7 @@ SIMPLE_JWT = {
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
 }
+
+# LiqPay API keys
+LIQPAY_PUBLIC_KEY = os.getenv("LIQPAY_PUBLIC_KEY")
+LIQPAY_PRIVATE_KEY = os.getenv("LIQPAY_PRIVATE_KEY")
