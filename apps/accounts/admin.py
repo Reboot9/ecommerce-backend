@@ -8,10 +8,11 @@ from typing import Union, Tuple, List
 
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from apps.accounts.models import CustomUser
-from apps.accounts.forms import CustomUserCreationForm
-from apps.base.admin import toggle_is_active
 from django.utils.translation import gettext_lazy as _
+
+from apps.accounts.forms import CustomUserCreationForm
+from apps.accounts.models import CustomUser
+from apps.base.admin import toggle_is_active
 
 
 @admin.register(CustomUser)
@@ -22,7 +23,7 @@ class CustomUserAdmin(BaseUserAdmin):
 
     add_form = CustomUserCreationForm
     list_display = [
-        "email",
+        "shortened_email",
         "first_name",
         "last_name",
         "created_at",
@@ -88,3 +89,11 @@ class CustomUserAdmin(BaseUserAdmin):
             },
         ),
     )
+
+    def shortened_email(self, obj):
+        """
+        Method to display a shortened version of the email address.
+        """
+        username, domain = obj.email.split("@")
+        truncated_username = username[:16] + "..." if len(username) > 23 else username
+        return f"{truncated_username}@{domain}"
