@@ -22,12 +22,29 @@ class DeliverySerializer(BaseDateSerializer, serializers.ModelSerializer):
     department = serializers.CharField(required=False)
     time = serializers.DateField(required=False)
     declaration = serializers.CharField(required=False)
+    option = serializers.ChoiceField(
+        required=False,
+        choices=Delivery.DeliveryOptionChoices,
+    )
 
     class Meta:
         model = Delivery
         exclude = ("created_at", "updated_at")
 
         read_only_fields = ("id",)
+
+    def validate(self, attrs):
+        """
+        Validate method to ensure option field is required when creating an instance.
+        """
+        if self.instance is None:
+            # If creating an instance, option field is required
+            if "option" not in attrs:
+                raise serializers.ValidationError(
+                    "`option` field is required. "
+                    "Possible choices are: `C` for courier and `D` for delivery."
+                )
+        return attrs
 
     # TODO: Consider about enabling this method to remove unused fields based on delivery option.
     # def to_representation(self, instance):

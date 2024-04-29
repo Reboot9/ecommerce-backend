@@ -2,6 +2,7 @@
 Functions responsible for creating orders and associated order items.
 """
 from django.db import transaction
+from django.shortcuts import get_object_or_404
 
 from apps.order.models.delivery import Delivery
 from apps.order.models.order import Order
@@ -21,13 +22,14 @@ def create_order(items: dict, delivery: dict, validated_data: dict) -> Order:
 def get_order_items(order: Order, items: dict):
     """Create order items for the given order."""
     for item in items:
-        product_id = item.get("product").id
+        product_id = item.get("product_id")
+        if product_id is None:
+            raise ValueError("Product ID is missing.")
         # quantity = item.get("quantity", 1)
         # price = Product.objects.get(pk=product_id).price
         # discount_percentage = Product.objects.get(pk=product_id).discount_percentage
-        product = Product.objects.select_related("price", "discount_percentage").get(pk=product_id)
+        product = get_object_or_404(Product, pk=product_id)
         create_order_item(order, product, item.get("quantity", 1))
-        # create_order_item(product_id, quantity, price, order, discount_percentage)
 
 
 def create_order_item(order: Order, product: Product, quantity: int) -> None:
