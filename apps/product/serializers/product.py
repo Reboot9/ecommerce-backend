@@ -73,14 +73,25 @@ class ProductDetailSerializer(ProductListSerializer):
         read_only_fields = ProductListSerializer.Meta.fields
 
 
-class LiteProductSerializer(ProductListSerializer):
+class LiteProductSerializer(serializers.ModelSerializer):
     """Simplified version of product serializer to be used in pair with other serializers."""
 
-    class Meta(ProductListSerializer.Meta):
+    class Meta:
         model = Product
         fields = [
-            field
-            for field in ProductListSerializer.Meta.fields
-            if field not in ("descriptionShort", "typesProduct", "")
+            "id",
+            "name",
+            "slug",
+            "categories",
+            "rating",
+            "image",
+            "price",
         ]
-        read_only_fields = ProductListSerializer.Meta.fields
+        read_only_fields = [
+            "name",
+            "slug",
+            "categories",
+            "rating",
+            "image",
+            "price",
+        ]
