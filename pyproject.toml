@@ -22,7 +22,7 @@ pillow = "^10.1.0"
 django-filter = "^23.5"
 dicttoxml = "^1.7.16"
 djangorestframework-xml = "^2.0.0"
-liqpay-python = "^1.0"
+liqpay-python = {git = "https://github.com/liqpay/sdk-python"}
 
 [tool.ruff]
 # Set the maximum line length
