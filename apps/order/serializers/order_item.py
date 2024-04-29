@@ -12,13 +12,26 @@ class OrderItemSerializer(BaseDateSerializer, serializers.ModelSerializer):
     """Serializer for OrderItem model."""
 
     # orderID = serializers.UUIDField(read_only=True, source="order_id")
-    # productID = serializers.UUIDField(required=True, source="product_id")
     product = LiteProductSerializer(read_only=True)
-    price = serializers.DecimalField(required=False, max_digits=10, decimal_places=2)
+    productID = serializers.UUIDField(required=True, write_only=True, source="product_id")
+    # price = serializers.DecimalField(read_only=True, max_digits=10, decimal_places=2,
+    #                                  source="product.price")
 
     class Meta:
         model = OrderItem
-        fields = ["id", "product", "price", "quantity"]
+        fields = ["id", "product", "productID", "quantity"]
         read_only_fields = [
             "id",
+            "product",
         ]
+
+    def update(self, instance, validated_data):
+        """If object is being updated don't allow product to be changed."""
+        validated_data.pop("productID", None)
+        return super().update(instance, validated_data)
+
+    def create(self, validated_data):
+        """Overriding create method to ensure productID is provided."""
+        product_id = validated_data.pop("productID")
+        if product_id is None:
+            raise serializers.ValidationError("Product ID is required.")

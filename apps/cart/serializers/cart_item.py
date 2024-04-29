@@ -24,12 +24,12 @@ class CartItemSerializer(serializers.ModelSerializer):
         decimal_places=2,
         read_only=True,
     )
-    price = serializers.DecimalField(
-        source="product.price",
-        max_digits=5,
-        decimal_places=2,
-        read_only=True,
-    )
+    # price = serializers.DecimalField(
+    #     source="product.price",
+    #     max_digits=5,
+    #     decimal_places=2,
+    #     read_only=True,
+    # )
     cost = serializers.DecimalField(
         max_digits=5,
         decimal_places=2,
