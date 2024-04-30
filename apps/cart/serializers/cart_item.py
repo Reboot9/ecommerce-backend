@@ -38,15 +38,15 @@ class CartItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CartItem
-        fields = ["id", "product", "productID", "quantity", "price", "discountPercentage", "cost"]
-        read_only_fields = ["id", "price", "discountPercentage", "cost"]
+        fields = ["id", "product", "productID", "quantity", "discountPercentage", "cost"]
+        read_only_fields = ["id", "discountPercentage", "cost"]
 
     def __init__(self, *args, **kwargs):
         """If object is being updated don't allow contact to be changed."""
         super().__init__(*args, **kwargs)
         if self.instance is not None:
             self.fields.get("product").read_only = True
-            self.fields.get("price").read_only = True
+            # self.fields.get("price").read_only = True
 
     def create(self, validated_data):
         """
