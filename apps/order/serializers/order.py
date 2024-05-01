@@ -14,7 +14,6 @@ from apps.order.models.order import Order
 from apps.order.serializers.delivery import DeliverySerializer
 from apps.order.serializers.order_item import OrderItemSerializer
 from apps.order.services import create_order
-# from apps.payment.services import Payment
 
 
 class OrderSerializer(BaseDateSerializer, serializers.ModelSerializer):
@@ -29,7 +28,7 @@ class OrderSerializer(BaseDateSerializer, serializers.ModelSerializer):
         required=True,
     )
     lastName = serializers.CharField(source="last_name")
-    email = serializers.EmailField(required=True)
+    email = serializers.EmailField(required=True, write_only=True)
     isPaid = serializers.BooleanField(source="is_paid", read_only=True, default=False)
     orderNumber = serializers.IntegerField(source="order_number", read_only=True)
     delivery = DeliverySerializer(required=False)
@@ -93,12 +92,6 @@ class OrderSerializer(BaseDateSerializer, serializers.ModelSerializer):
             raise serializers.ValidationError("`delivery` is required when creating an instance.")
 
         order_instance = create_order(order_items, delivery, validated_data)
-
-        # order_number = str(order_instance.id)
-        # cost = str(order_instance.total_order_price)
-        #
-        # payment = Payment()
-        # payment_response = payment.generate_new_url_for_pay(order_number, cost)
 
         return order_instance
 
