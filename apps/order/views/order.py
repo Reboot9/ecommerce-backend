@@ -15,11 +15,7 @@ from apps.order.serializers.order import OrderSerializer
 class OrderViewSet(viewsets.ModelViewSet):
     """Handlers for operation with order."""
 
-    http_method_names = [
-        "get",
-        "post",
-        "patch",
-    ]
+    http_method_names = ["get", "post", "patch", "head", "options", "trace"]
     serializer_class = OrderSerializer
     pagination_class = PaginationCommon
 

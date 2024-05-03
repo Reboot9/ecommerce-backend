@@ -13,10 +13,7 @@ class OrderItemViewSet(viewsets.ModelViewSet):
     ViewSet to handle operations on OrderItem.
     """
 
-    http_method_names = [
-        "get",
-        "post",
-    ]
+    http_method_names = ["get", "post", "head", "options", "trace"]
     serializer_class = OrderItemSerializer
 
     def get_permissions(self):

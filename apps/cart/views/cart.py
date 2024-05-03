@@ -13,7 +13,7 @@ from apps.cart.services.cart import deactivate_empty_cart
 class CartViewSet(viewsets.ModelViewSet):
     """Cart management API."""
 
-    http_method_names = ["get", "destroy"]
+    http_method_names = ["get", "destroy", "head", "options", "trace"]
     serializer_class = CartSerializer
     permission_classes = [permissions.IsAuthenticated]
 
