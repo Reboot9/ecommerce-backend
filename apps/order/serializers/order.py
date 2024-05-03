@@ -36,6 +36,7 @@ class OrderSerializer(BaseDateSerializer, serializers.ModelSerializer):
     cost = serializers.SerializerMethodField(
         read_only=True,
     )
+    status = serializers.SerializerMethodField()
     # Additional field for cart_id
     cartID = serializers.UUIDField(write_only=True, required=False)
 
@@ -72,15 +73,19 @@ class OrderSerializer(BaseDateSerializer, serializers.ModelSerializer):
         Note, that there's two possible ways of creating an order: via items from cart when there's
         cartID in json data or by providing order items itself.
         """
-        cart_id = validated_data.pop("cartID", None)
-        if cart_id:
-            cart = get_object_or_404(
-                Cart, is_active=True, user=self.context["request"].user, id=cart_id
-            )
-            validated_data["items"] = [
-                {"productID": item.product.id, "quantity": item.quantity}
-                for item in cart.items.all()
-            ]
+        request = self.context.get("request")
+        if request:
+            cart_id = validated_data.pop("cartID", None)
+            if cart_id:
+                if not request.user.is_authenticated:
+                    raise serializers.ValidationError(
+                        "Only authenticated users can create orders via cart."
+                    )
+                cart = get_object_or_404(Cart, is_active=True, user=request.user, id=cart_id)
+                validated_data["items"] = [
+                    {"productID": item.product.id, "quantity": item.quantity}
+                    for item in cart.items.all()
+                ]
 
         order_items = validated_data.pop("items", None)
         delivery = validated_data.pop("delivery", None)
@@ -103,3 +108,12 @@ class OrderSerializer(BaseDateSerializer, serializers.ModelSerializer):
         :return: cost of the order
         """
         return instance.total_order_price
+
+    def get_status(self, instance):
+        """
+        Method to obtain order status as display value.
+
+        :param instance: Order instance.
+        :return: display value of order status.
+        """
+        return instance.get_status_display()
