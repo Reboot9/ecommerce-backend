@@ -45,7 +45,9 @@ class Payment:
         data["language"] = "uk"
         data["description"] = f"{text}"
         data["order_id"] = order_id
-        data["server_url"] = "http://127.0.0.1/test/"
+
+        # Couldn't resolve an issue that LiqPay doesnt send any requests to the server
+        # data["server_url"] = f"http://host/api/orders/callback/"
 
         data_to_sign = self.liqpay.data_to_sign(data)
         params = {"data": data_to_sign, "signature": self.liqpay.cnb_signature(data)}
