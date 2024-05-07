@@ -62,7 +62,7 @@ class CustomUserCreationForm(UserCreationForm):
 
         if not validate_password_format(password1):
             raise forms.ValidationError(
-                "Password must contain only Latin letters,"
-                " numbers, and special characters (@#$%^&+=)."
+                "Password must contain only Latin letters, "
+                "numbers, and special characters (!\"#$%&'()*+,-./:;<>?=@[\\]^_`{|}~)."
             )
         return password1

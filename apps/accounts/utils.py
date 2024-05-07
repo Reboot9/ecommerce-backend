@@ -11,4 +11,5 @@ def validate_password_format(password: str) -> bool:
     :param password: password to be validated.
     :return: True if password is valid, False otherwise.
     """
-    return bool(re.match("^[a-zA-Z0-9@#$%^&+=]+$", password))
+    res = re.match(r"^[a-zA-Z0-9!\"#$%&'()*+,-./:;<>?=@[\\\]^_`{|}~]+$", password)
+    return bool(res)
