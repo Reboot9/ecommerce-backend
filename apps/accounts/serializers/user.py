@@ -1,12 +1,12 @@
 """
 Contains serializers for user-related models and registration logic.
 """
-import re
 from typing import Dict, Any
 
 from rest_framework import serializers
 
 from apps.accounts.models import CustomUser
+from apps.accounts.utils import validate_password_format
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -74,7 +74,7 @@ class UserSerializer(serializers.ModelSerializer):
         # Validate the password format
         password = data.get("password")
         if password:
-            if not re.match("^[a-zA-Z0-9@#$%^&+=]+$", password):
+            if not validate_password_format(password):
                 raise serializers.ValidationError(
                     {
                         "password": "Password must contain only latin letters,"

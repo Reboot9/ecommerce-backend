@@ -1,13 +1,13 @@
 """
 Forms for user creation and modification.
 """
-import re
 from typing import Dict, Type
 
-from django.contrib.auth.forms import UserCreationForm
 from django import forms
+from django.contrib.auth.forms import UserCreationForm
 
 from apps.accounts.models import CustomUser
+from apps.accounts.utils import validate_password_format
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -60,7 +60,7 @@ class CustomUserCreationForm(UserCreationForm):
         """
         password1 = self.cleaned_data.get("password1")
 
-        if not re.match("^[a-zA-Z0-9@#$%^&+=]+$", password1):
+        if not validate_password_format(password1):
             raise forms.ValidationError(
                 "Password must contain only Latin letters,"
                 " numbers, and special characters (@#$%^&+=)."
