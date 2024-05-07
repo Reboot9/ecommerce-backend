@@ -31,7 +31,10 @@ class DeliveryModelAdminForm(forms.ModelForm):
         cleaned_data = super().clean()
 
         if cleaned_data.get("option") == Delivery.DeliveryOptionChoices.COURIER:
-            for field in ("street", "house", "entrance", "time"):
+            required_fields = ["street", "time"]
+            if not (cleaned_data.get("house") or cleaned_data.get("flat")):
+                self.add_error(None, "Either house or flat is required for courier delivery.")
+            for field in required_fields:
                 if not cleaned_data.get(field):
                     self.add_error(field, "This field is required")
         elif cleaned_data.get("option") == Delivery.DeliveryOptionChoices.DELIVERY:
