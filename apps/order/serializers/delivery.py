@@ -47,18 +47,19 @@ class DeliverySerializer(BaseDateSerializer, serializers.ModelSerializer):
 
             # Perform additional validation based on the option value
             option = attrs.get("option")
+            required_fields = []
             if option == Delivery.DeliveryOptionChoices.COURIER:
                 required_fields = ["street", "entrance", "time"]
                 if not (attrs.get("house") or attrs.get("flat")):
                     raise serializers.ValidationError(
                         "Either house or flat is required for courier delivery."
                     )
-                for field in required_fields:
-                    if not attrs.get(field):
-                        raise serializers.ValidationError(f"This field '{field}' is required")
             elif option == Delivery.DeliveryOptionChoices.DELIVERY:
-                if not attrs.get("department"):
-                    raise serializers.ValidationError("Department field is required for Delivery.")
+                required_fields = ["department"]
+
+            for field in required_fields:
+                if not attrs.get(field):
+                    raise serializers.ValidationError(f"This field '{field}' is required")
 
         return attrs
 
