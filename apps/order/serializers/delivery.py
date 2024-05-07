@@ -44,7 +44,36 @@ class DeliverySerializer(BaseDateSerializer, serializers.ModelSerializer):
                     "`option` field is required. "
                     "Possible choices are: `C` for courier and `D` for delivery."
                 )
+
+            # Perform additional validation based on the option value
+            option = attrs.get("option")
+            if option == Delivery.DeliveryOptionChoices.COURIER:
+                required_fields = ["street", "entrance", "time"]
+                if not (attrs.get("house") or attrs.get("flat")):
+                    raise serializers.ValidationError(
+                        "Either house or flat is required for courier delivery."
+                    )
+                for field in required_fields:
+                    if not attrs.get(field):
+                        raise serializers.ValidationError(f"This field '{field}' is required")
+            elif option == Delivery.DeliveryOptionChoices.DELIVERY:
+                if not attrs.get("department"):
+                    raise serializers.ValidationError("Department field is required for Delivery.")
+
         return attrs
+
+    def to_representation(self, instance):
+        """
+        Convert model instance to a dictionary for serialization.
+
+        :param instance: Delivery instance to be serialized.
+        :return: serialized representation of Delivery.
+        """
+        representation = super().to_representation(instance)
+        option = dict(Delivery.DeliveryOptionChoices.choices).get(representation["option"])
+        representation["option"] = option
+
+        return representation
 
     # TODO: Consider about enabling this method to remove unused fields based on delivery option.
     # def to_representation(self, instance):
