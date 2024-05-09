@@ -100,8 +100,8 @@ class UserAPITestCase(APITestCase):
         password_error = str(response.data["password"][0])
         password2_error = str(response.data["password2"][0])
         expected_error_message = (
-            "Password must contain only latin letters, "
-            "numbers, and special characters (@#$%^&+=)."
+            "Password must contain only latin letters, numbers, and special characters "
+            "(!\"#$%&'()*+,-./:;<>?=@[\\]^_`{|}~)."
         )
 
         self.assertIn(password_error, expected_error_message)
