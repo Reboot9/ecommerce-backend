@@ -77,10 +77,10 @@ class UserSerializer(serializers.ModelSerializer):
             if not validate_password_format(password):
                 raise serializers.ValidationError(
                     {
-                        "password": "Password must contain only latin letters, "
-                        "numbers, and special characters (!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~).",
-                        "password2": "Password must contain only latin letters, "
-                        "numbers, and special characters (!\"#$%&'()*+,-./:;<>?=@[\\]^_`{|}~).",
+                        "password": "Password must contain only latin letters, numbers, and"
+                        " special characters (!\"#$%&'()*+,-./:;<>?=@[\\]^_`{|}~).",
+                        "password2": "Password must contain only latin letters, numbers, and"
+                        " special characters (!\"#$%&'()*+,-./:;<>?=@[\\]^_`{|}~).",
                     }
                 )
 
