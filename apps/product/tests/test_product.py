@@ -1,6 +1,8 @@
 """
 Test module for product related functionality.
 """
+import logging
+
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.test import TestCase
@@ -39,12 +41,24 @@ class ProductSetupMixin:
             country_brand_registration="Test Brand Registration",
         )
 
-        self.category = Category.objects.create(name="Test Category Name", slug="test-category")
-        self.subcategory = Category.objects.create(
-            name="Test Subcategory", slug="test-subcategory", parent=self.category
+        self.top_level_category = Category.objects.create(
+            name="Top Level Category",
+            slug="top-level-category",
+            level=0,
         )
-        self.lower_category = Category.objects.create(
-            name="Test Lower Category", slug="test-lower-category", parent=self.subcategory
+
+        self.medium_level_category = Category.objects.create(
+            name="Medium Level Category",
+            slug="medium-level-category",
+            parent=self.top_level_category,
+            level=1,
+        )
+
+        self.lower_level_category = Category.objects.create(
+            name="Lower Level Category",
+            slug="lower-level-category",
+            parent=self.medium_level_category,
+            level=2,
         )
 
         # Create sample product data
@@ -58,7 +72,7 @@ class ProductSetupMixin:
             price=100.00,
             product_code="TEST123",
             manufacturer=self.manufacturer,
-            categories=self.lower_category,
+            categories=self.lower_level_category,
             image="product/default.jpg",
         )
 
@@ -74,6 +88,16 @@ class ProductTestCase(ProductSetupMixin, TestCase):
         """
         super().product_setup()
 
+        # Reduce the log level to avoid messages like 'bad request'
+        logger = logging.getLogger("django.request")
+        self.previous_level = logger.getEffectiveLevel()
+        logger.setLevel(logging.ERROR)
+
+    def tearDown(self) -> None:
+        """Reset the log level back to normal."""
+        logger = logging.getLogger("django.request")
+        logger.setLevel(self.previous_level)
+
     def test_create_product(self):
         """
         Test product creation.
@@ -86,7 +110,7 @@ class ProductTestCase(ProductSetupMixin, TestCase):
         self.assertEqual(product.price, 100.00)
         self.assertEqual(product.product_code, "TEST123")
         self.assertEqual(product.manufacturer.trade_brand, "Test Brand")
-        self.assertEqual(product.categories.name, "Test Lower Category")
+        self.assertEqual(product.categories.name, "Lower Level Category")
         self.assertEqual(product.image, "product/default.jpg")
 
     def test_rating_validation(self):
@@ -155,6 +179,16 @@ class ProductAPITestCase(ProductSetupMixin, APITestCase):
         """
         super().product_setup()
 
+        # Reduce the log level to avoid messages like 'bad request'
+        logger = logging.getLogger("django.request")
+        self.previous_level = logger.getEffectiveLevel()
+        logger.setLevel(logging.ERROR)
+
+    def tearDown(self) -> None:
+        """Reset the log level back to normal."""
+        logger = logging.getLogger("django.request")
+        logger.setLevel(self.previous_level)
+
     def test_product_list(self):
         """
         Test the product list endpoint.
@@ -195,9 +229,9 @@ class ProductAPITestCase(ProductSetupMixin, APITestCase):
         url = reverse(
             "product:product-detail-by-category",
             kwargs={
-                "category_slug": self.category.slug,
-                "subcategory_slug": self.subcategory.slug,
-                "lower_category_slug": self.lower_category.slug,
+                "category_slug": self.top_level_category.slug,
+                "subcategory_slug": self.medium_level_category.slug,
+                "lower_category_slug": self.lower_level_category.slug,
                 "product_slug": self.product.slug,
             },
         )
@@ -209,7 +243,7 @@ class ProductAPITestCase(ProductSetupMixin, APITestCase):
         self.assertEqual(response.data["productCode"], self.product.product_code)
         self.assertEqual(response.data["price"], f"{self.product.price:.2f}")
         self.assertEqual(response.data["priceDiscount"], f"{self.product.price_discount:.2f}")
-        self.assertEqual(response.data["categories"], self.lower_category.slug)
+        self.assertEqual(response.data["categories"], self.lower_level_category.slug)
         self.assertEqual(response.data["manufacturer"]["id"], str(self.manufacturer.id))
 
     def test_product_category_list(self):
@@ -217,9 +251,9 @@ class ProductAPITestCase(ProductSetupMixin, APITestCase):
         url = reverse(
             "product:product-list-by-category",
             kwargs={
-                "category_slug": self.category.slug,
-                "subcategory_slug": self.subcategory.slug,
-                "lower_category_slug": self.lower_category.slug,
+                "category_slug": self.top_level_category.slug,
+                "subcategory_slug": self.medium_level_category.slug,
+                "lower_category_slug": self.lower_level_category.slug,
             },
         )
 
