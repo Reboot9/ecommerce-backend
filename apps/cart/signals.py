@@ -20,6 +20,13 @@ User = get_user_model()
 #         CartItem.objects.filter(cart=cart, product=instance).update(price=instance.price)
 
 
+@receiver(post_save, sender=User)
+def create_cart_for_user(sender, instance, created, **kwargs):
+    """Create cart for user if he just created his account."""
+    if created:
+        Cart.objects.create(user=instance)
+
+
 @receiver(post_save, sender=Order)
 def delete_cart_after_order(sender, instance, created, **kwargs):
     """Make the cart inactive after creating an order."""
