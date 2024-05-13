@@ -87,6 +87,9 @@ class OrderSerializer(BaseDateSerializer, serializers.ModelSerializer):
                     for item in cart.items.all()
                 ]
 
+                if not validated_data["items"]:
+                    raise serializers.ValidationError("Cannot create an order if cart is empty.")
+
         order_items = validated_data.pop("items", None)
         delivery = validated_data.pop("delivery", None)
         if order_items is None:
