@@ -33,7 +33,9 @@ def delete_cart_after_order(sender, instance, created, **kwargs):
     if created:
         try:
             user = User.objects.get(email=instance.email)
-            cart = Cart.objects.get(user=user, is_active=True).update(is_active=False)  # noqa: F841
+            cart = Cart.objects.get(user=user, is_active=True)  # noqa: F841
+            cart.is_active = False
+            cart.save()
         except ObjectDoesNotExist:
             pass  # Cart or user not found, this is possible in two cases:
             # if the user is not registered
