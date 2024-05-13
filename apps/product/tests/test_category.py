@@ -55,7 +55,7 @@ class CategoryTestCase(ProductSetupMixin, TestCase):
 
         self.assertEqual(updated_category.name, "Updated Top Level Category")
 
-    def assert_response_data(self, response_data):
+    def assert_subcategory_response_data(self, response_data):
         """Utility method to assert the structure and content of the response data."""
         self.assertIn("id", response_data)
         self.assertIn("name", response_data)
@@ -85,7 +85,7 @@ class CategoryTestCase(ProductSetupMixin, TestCase):
         category = response_data["results"][0]
 
         # Check if the category has the expected keys
-        self.assert_response_data(category)
+        self.assert_subcategory_response_data(category)
 
         lower_category = category["subcategories"][0]["subcategories"][0]
 
@@ -106,7 +106,7 @@ class CategoryTestCase(ProductSetupMixin, TestCase):
         response_data = response.data
 
         # Check if the response has expected keys
-        self.assert_response_data(response_data)
+        self.assert_subcategory_response_data(response_data)
 
     def test_category_descendants_with_invalid_category_slug(self):
         """
@@ -134,7 +134,7 @@ class CategoryTestCase(ProductSetupMixin, TestCase):
         response_data = response.data
 
         # Check if the response has expected keys
-        self.assert_response_data(response_data)
+        self.assert_subcategory_response_data(response_data)
 
     def test_subcategory_descendants_with_invalid_category_slug(self):
         """
