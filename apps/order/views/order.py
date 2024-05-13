@@ -56,6 +56,8 @@ class OrderViewSet(viewsets.ModelViewSet):
         else:
             # If the user is not authenticated, retrieve the order based on the email
             # provided in the order data
+
+            # Note that this condition won't work because of get_permissions() method.
             order_email = self.request.data.get("email")
             if not order_email:
                 raise ValidationError("Email is required for unauthenticated requests.")
