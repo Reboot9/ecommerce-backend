@@ -3,7 +3,7 @@ Django signals related to the Cart models.
 """
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 
 from apps.cart.models import Cart
@@ -25,6 +25,17 @@ def create_cart_for_user(sender, instance, created, **kwargs):
     """Create cart for user if he just created his account."""
     if created:
         Cart.objects.create(user=instance)
+
+
+@receiver(post_delete, sender=Cart)
+def recreate_cart_for_user(sender, instance, **kwargs):
+    """Create a new cart for the user after the existing one is deleted."""
+    user = instance.user
+    # Check if the user exists and if they have any active carts
+    if user:
+        active_cart_exists = Cart.objects.filter(user=user, is_active=True).exists()
+        if not active_cart_exists:
+            Cart.objects.create(user=user)
 
 
 @receiver(post_save, sender=Order)
