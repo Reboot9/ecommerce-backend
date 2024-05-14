@@ -90,7 +90,7 @@ def create_reserves_for_order_item(sender, instance, created, **kwargs):
             )
 
             # Deactivate related reserve
-            Reserve.objects.get(
+            Reserve.objects.get_or_create(
                 order=order,
                 reserved_item=instance.product,
             ).update(is_active=False)
