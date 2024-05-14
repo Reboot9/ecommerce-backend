@@ -13,17 +13,16 @@ class OrderItemViewSet(viewsets.ModelViewSet):
     ViewSet to handle operations on OrderItem.
     """
 
-    http_method_names = ["get", "post", "head", "options", "trace"]
+    http_method_names = ["get", "post", "put", "head", "options", "trace"]
     serializer_class = OrderItemSerializer
 
     def get_permissions(self):
         """Set permissions based on the action."""
-        if self.action in [
-            "list",
-            "retrieve",
-        ]:
+        if self.action in ["list", "retrieve"]:
             # Allow access only to authenticated users for listing and retrieving order items.
             return [permissions.IsAuthenticated()]
+        elif self.action in ["partial_update"]:
+            return [permissions.IsAdminUser()]
         else:
             # Allow any user to perform other actions.
             return [permissions.AllowAny()]
