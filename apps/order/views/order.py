@@ -26,7 +26,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         if self.action in ["list", "retrieve"]:
             # Allow access only to authenticated users for listing and retrieving orders.
             return [permissions.IsAuthenticated()]
-        elif self.action in ["patch"]:
+        elif self.action in ["partial_update"]:
             return [permissions.IsAdminUser()]
         else:
             # Allow any user to perform other actions.
