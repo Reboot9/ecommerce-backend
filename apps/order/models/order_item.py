@@ -58,7 +58,8 @@ class OrderItem(BaseID, BaseDate):
     @property
     def order_item_cost(self) -> Decimal:
         """Calculate the total cost of item in the order."""
-        cost = self.quantity * self.price * ((100 - self.discount_percentage) / 100)
+        discount = Decimal(str(self.discount_percentage)) / Decimal("100")
+        cost = self.quantity * self.price * (Decimal("1") - discount)
         return Decimal(cost).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
     def clean(self):
