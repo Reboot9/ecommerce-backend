@@ -18,7 +18,7 @@ class DeliverySerializer(BaseDateSerializer, serializers.ModelSerializer):
     house = serializers.CharField(required=False)
     flat = serializers.CharField(required=False)
     floor = serializers.IntegerField(required=False)
-    entrance = serializers.IntegerField(required=False)
+    entrance = serializers.CharField(required=False)
     department = serializers.CharField(required=False)
     time = serializers.DateField(required=False)
     declaration = serializers.CharField(required=False)
@@ -41,8 +41,10 @@ class DeliverySerializer(BaseDateSerializer, serializers.ModelSerializer):
             # If creating an instance, option field is required
             if "option" not in attrs:
                 raise serializers.ValidationError(
-                    "`option` field is required. "
-                    "Possible choices are: `C` for courier and `D` for delivery."
+                    {
+                        "option": "`option` field is required. "
+                        "Possible choices are: `C` for courier and `D` for delivery."
+                    }
                 )
 
             # Perform additional validation based on the option value
@@ -59,7 +61,7 @@ class DeliverySerializer(BaseDateSerializer, serializers.ModelSerializer):
 
             for field in required_fields:
                 if not attrs.get(field):
-                    raise serializers.ValidationError(f"This field '{field}' is required")
+                    raise serializers.ValidationError({f"{field}": f"Field '{field}' is required"})
 
         return attrs
 
