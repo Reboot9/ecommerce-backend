@@ -2,8 +2,10 @@
 This module contains handlers for the OrderItem model.
 """
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, status
+from rest_framework.response import Response
 
+from apps.order.models.order import Order
 from apps.order.models.order_item import OrderItem
 from apps.order.serializers.order_item import OrderItemSerializer
 
@@ -13,7 +15,7 @@ class OrderItemViewSet(viewsets.ModelViewSet):
     ViewSet to handle operations on OrderItem.
     """
 
-    http_method_names = ["get", "post", "put", "head", "options", "trace"]
+    http_method_names = ["get", "post", "patch", "head", "options", "trace"]
     serializer_class = OrderItemSerializer
 
     def get_permissions(self):
@@ -21,7 +23,7 @@ class OrderItemViewSet(viewsets.ModelViewSet):
         if self.action in ["list", "retrieve"]:
             # Allow access only to authenticated users for listing and retrieving order items.
             return [permissions.IsAuthenticated()]
-        elif self.action in ["partial_update"]:
+        elif self.action in ["partial_update", "create"]:
             return [permissions.IsAdminUser()]
         else:
             # Allow any user to perform other actions.
@@ -47,5 +49,12 @@ class OrderItemViewSet(viewsets.ModelViewSet):
         )
 
     def perform_create(self, serializer):
-        """Associate newly created order item with the user."""
-        serializer.save(order__user=self.request.user)
+        """Associate newly created order item with the order."""
+        order_id = self.kwargs.get("order_id")
+        order_instance = get_object_or_404(Order, id=order_id)
+
+        order_item = serializer.save(order=order_instance)
+        order_instance.items.add(order_item)
+        order_instance.save()
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
