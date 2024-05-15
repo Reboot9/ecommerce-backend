@@ -7,15 +7,20 @@ from rest_framework.response import Response
 
 from apps.cart.models import Cart
 from apps.cart.serializers import CartSerializer
-from apps.cart.services.cart import deactivate_empty_cart
 
 
 class CartViewSet(viewsets.ModelViewSet):
     """Cart management API."""
 
-    http_method_names = ["get", "destroy", "head", "options", "trace"]
+    http_method_names = ["get", "delete", "head", "options", "trace"]
     serializer_class = CartSerializer
-    permission_classes = [permissions.IsAuthenticated]
+
+    def get_permissions(self):
+        """Set permissions based on the action."""
+        if self.action in ["destroy"]:
+            return [permissions.IsAdminUser()]
+
+        return [permissions.IsAuthenticated()]
 
     def get_queryset(self):
         """
@@ -79,6 +84,7 @@ class CartViewSet(viewsets.ModelViewSet):
         :param args: Additional positional arguments.
         :param kwargs: Additional keyword arguments.
         """
-        instance = self.get_object()
-        deactivate_empty_cart(instance)
+        cart_instance = self.get_object()
+        cart_instance.is_active = False
+        cart_instance.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
