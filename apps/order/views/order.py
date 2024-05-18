@@ -84,9 +84,9 @@ class OrderViewSet(viewsets.ModelViewSet):
         order_id = str(order_instance.id)
 
         liqpay = Payment()
-        payment_response = liqpay.generate_new_url_for_pay(order_id, cost)
+        payment_response, status_code = liqpay.generate_new_url_for_pay(order_id, cost)
 
-        return Response(payment_response)
+        return Response(payment_response, status=status_code)
 
     @action(detail=False, methods=["GET"])
     def callback(self, request):
@@ -117,6 +117,6 @@ class OrderViewSet(viewsets.ModelViewSet):
             )
 
         return Response(
-            {"error": "Payment status not received or invalid."},
+            {"message": "Payment status not received or invalid."},
             status=status.HTTP_400_BAD_REQUEST,
         )

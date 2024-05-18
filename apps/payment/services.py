@@ -7,6 +7,7 @@ from typing import Union
 import requests
 from django.utils import timezone
 from liqpay import LiqPay
+from rest_framework import status
 
 from ecommerce_backend.settings import base
 
@@ -28,7 +29,7 @@ class Payment:
             "version": "3",
         }
 
-    def generate_new_url_for_pay(self, order_id, cost, *, text="") -> Union[str, None]:
+    def generate_new_url_for_pay(self, order_id, cost, *, text="") -> tuple[dict[str, str], int]:
         """
         Generate new payment url for order.
 
@@ -46,7 +47,7 @@ class Payment:
         data["description"] = f"{text}"
         data["order_id"] = order_id
 
-        # Couldn't resolve an issue that LiqPay doesnt send any requests to the server
+        # Couldn't resolve an issue that LiqPay doesn't send any requests to the server
         # data["server_url"] = f"http://host/api/orders/callback/"
 
         data_to_sign = self.liqpay.data_to_sign(data)
@@ -55,18 +56,24 @@ class Payment:
         try:
             response = requests.post(url=LIQPAY_CHECKOUT_URL, data=params)
             if response.status_code == 200:
-                return response.url
+                return {"payment_url": response.url}, status.HTTP_200_OK
             else:
                 logging.warning(
                     f"[{timezone.localtime(timezone.now())}] "
                     f"| incorrect status code from response - {response.status_code}, "
-                    f"has to be 200, data- {data}, params - {params}"
+                    f"has to be 200, data - {data}, params - {params}"
                 )
-                return
+
+                return (
+                    {"message": f"Incorrect status code from response - {response.status_code}"},
+                    status.HTTP_503_SERVICE_UNAVAILABLE,
+                )
         except requests.RequestException as e:
             logging.exception(
-                f"Error sending request to LiqPay: {e}, data- {data}, " f"params - {params}"
+                f"Error sending request to LiqPay: {e}, data - {data}, params - {params}"
             )
+
+            return {"message": "Error processing payment"}, status.HTTP_503_SERVICE_UNAVAILABLE
 
     def get_order_status_from_liqpay(self, order_id) -> Union[dict, bool]:
         """
