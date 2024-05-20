@@ -8,7 +8,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 
-from apps.base.mixins import CachedRetrieveView, CachedListView
+from apps.base.mixins import CachedRetrieveMixin, CachedListMixin
 from apps.base.pagination import PaginationCommon
 from apps.product.filters.product import ProductFilter
 from apps.product.mixins.category import CategoryMixin
@@ -16,7 +16,7 @@ from apps.product.models import Product
 from apps.product.serializers.product import ProductListSerializer, ProductDetailSerializer
 
 
-class ProductCategoryListView(CategoryMixin, CachedListView, ListAPIView):
+class ProductCategoryListView(CategoryMixin, CachedListMixin, ListAPIView):
     """
     Returns a list of products, filtered by categories.
 
@@ -55,7 +55,7 @@ class ProductCategoryListView(CategoryMixin, CachedListView, ListAPIView):
         )
 
 
-class ProductDetailView(CategoryMixin, CachedRetrieveView, RetrieveAPIView):
+class ProductDetailView(CategoryMixin, CachedRetrieveMixin, RetrieveAPIView):
     """Returns one product."""
 
     serializer_class = ProductDetailSerializer

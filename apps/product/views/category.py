@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
 from rest_framework.response import Response
 
-from apps.base.mixins import CachedListView, CachedRetrieveView
+from apps.base.mixins import CachedListMixin, CachedRetrieveMixin
 from apps.base.pagination import PaginationCommon
 from apps.product.models import Category
 from apps.product.serializers.category import CategoryDetailSerializer, CategoryListSerializer
@@ -15,7 +15,7 @@ from apps.product.serializers.category import CategoryDetailSerializer, Category
 CACHE_TTL = getattr(settings, "CACHE_TTL", DEFAULT_TIMEOUT)
 
 
-class CategoryDetailView(CachedRetrieveView, generics.RetrieveAPIView):
+class CategoryDetailView(CachedRetrieveMixin, generics.RetrieveAPIView):
     """
     API View for retrieving single category with its descendants.
     """
@@ -54,7 +54,7 @@ class CategoryDetailView(CachedRetrieveView, generics.RetrieveAPIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
 
-class CategoryListView(CachedListView, generics.ListAPIView):
+class CategoryListView(CachedListMixin, generics.ListAPIView):
     """
     API View for retrieving list of categories.
     """

@@ -6,13 +6,13 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, permissions
 from rest_framework.response import Response
 
-from apps.base.mixins import CachedListView, CACHE_TTL
+from apps.base.mixins import CachedListMixin, CACHE_TTL
 from apps.order.models.order import Order
 from apps.order.models.order_item import OrderItem
 from apps.order.serializers.order_item import OrderItemSerializer
 
 
-class OrderItemViewSet(CachedListView, viewsets.ModelViewSet):
+class OrderItemViewSet(CachedListMixin, viewsets.ModelViewSet):
     """
     ViewSet to handle operations on OrderItem.
     """

@@ -9,14 +9,14 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
-from apps.base.mixins import CachedListView, CACHE_TTL
+from apps.base.mixins import CachedListMixin, CACHE_TTL
 from apps.base.pagination import PaginationCommon
 from apps.order.models.order import Order
 from apps.order.serializers.order import OrderSerializer
 from apps.payment.services import Payment
 
 
-class OrderViewSet(CachedListView, viewsets.ModelViewSet):
+class OrderViewSet(CachedListMixin, viewsets.ModelViewSet):
     """Handlers for operation with order."""
 
     http_method_names = ["get", "post", "patch", "head", "options", "trace"]

@@ -19,7 +19,7 @@ from apps.accounts import schemas
 from apps.accounts.models import CustomUser
 from apps.accounts.serializers.token import TokenRefreshResponseSerializer
 from apps.accounts.serializers.user import UserSerializer
-from apps.base.mixins import CachedListView
+from apps.base.mixins import CachedListMixin
 from apps.base.pagination import PaginationCommon
 
 # TODO: consider about adding more Swagger things like tags
@@ -199,7 +199,7 @@ class DecoratedTokenRefreshView(jwt_views.TokenRefreshView):
         },
     ),
 )
-class UserViewSet(CachedListView, viewsets.ModelViewSet):
+class UserViewSet(CachedListMixin, viewsets.ModelViewSet):
     """
     User management API.
     """
