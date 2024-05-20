@@ -66,7 +66,7 @@ class ProductDetailView(CategoryMixin, CachedRetrieveView, RetrieveAPIView):
         """
         Generate cache key based on URL kwargs.
         """
-        return f"product_detail_{self.request.path}?{self.request.GET.urlencode()}"
+        return f"product_detail:{self.request.path}?{self.request.GET.urlencode()}"
 
     def get_queryset(self):
         """Filters the queryset based on the product's unique slug."""
