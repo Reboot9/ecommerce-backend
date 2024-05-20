@@ -1,22 +1,35 @@
 """
 This module contains handlers for the OrderItem model.
 """
+from django.core.cache import cache
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, permissions, status
+from rest_framework import viewsets, permissions
 from rest_framework.response import Response
 
+from apps.base.mixins import CachedListView, CACHE_TTL
 from apps.order.models.order import Order
 from apps.order.models.order_item import OrderItem
 from apps.order.serializers.order_item import OrderItemSerializer
 
 
-class OrderItemViewSet(viewsets.ModelViewSet):
+class OrderItemViewSet(CachedListView, viewsets.ModelViewSet):
     """
     ViewSet to handle operations on OrderItem.
     """
 
     http_method_names = ["get", "post", "patch", "head", "options", "trace"]
     serializer_class = OrderItemSerializer
+
+    def get_cache_key(self, order_item_id=None) -> str:
+        """
+        Method to get cache key.
+
+        :return: cache key for the order items.
+        """
+        if order_item_id is not None:
+            return f"order_item_detail:{self.request.path}?{self.request.GET.urlencode()}"
+
+        return f"order_item_list:{self.request.path}?{self.request.GET.urlencode()}"
 
     def get_permissions(self):
         """Set permissions based on the action."""
@@ -57,4 +70,40 @@ class OrderItemViewSet(viewsets.ModelViewSet):
         order_instance.items.add(order_item)
         order_instance.save()
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        # Clear the list cache when a new order is created
+        cache.delete("order_item_list")
+        return order_instance
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieve a specific order item instance.
+        """
+        order_item_id = self.kwargs.get("pk")
+        cache_key = self.get_cache_key(order_item_id)
+        cached_data = cache.get(cache_key)
+        if cached_data is not None:
+            return Response(cached_data)
+
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        data = serializer.data
+
+        cache.set(cache_key, data, timeout=CACHE_TTL)
+
+        return Response(data)
+
+    def perform_update(self, serializer) -> None:
+        """
+        Perform actions when updating Order instance.
+
+        :param serializer: The serializer instance used for validation and saving.
+        :return:
+        """
+        instance = serializer.save()
+
+        # Clear individual order cache and list cache
+        order_item_id = self.kwargs.get("pk")
+        cache.delete(self.get_cache_key(order_item_id))
+        cache.delete("order_item_list")
+
+        return instance

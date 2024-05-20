@@ -2,24 +2,37 @@
 This module contains handlers for the order app.
 """
 from django.contrib.auth.models import AnonymousUser
+from django.core.cache import cache
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
+from apps.base.mixins import CachedListView, CACHE_TTL
 from apps.base.pagination import PaginationCommon
 from apps.order.models.order import Order
 from apps.order.serializers.order import OrderSerializer
 from apps.payment.services import Payment
 
 
-class OrderViewSet(viewsets.ModelViewSet):
+class OrderViewSet(CachedListView, viewsets.ModelViewSet):
     """Handlers for operation with order."""
 
     http_method_names = ["get", "post", "patch", "head", "options", "trace"]
     serializer_class = OrderSerializer
     pagination_class = PaginationCommon
+
+    def get_cache_key(self, order_id=None) -> str:
+        """
+        Method to get cache key.
+
+        :return: cache key for the orders.
+        """
+        if order_id is not None:
+            return f"orders_detail:{self.request.path}?{self.request.GET.urlencode()}"
+
+        return f"orders_list:{self.request.path}?{self.request.GET.urlencode()}"
 
     def get_permissions(self):
         """Set permissions based on the action."""
@@ -63,12 +76,58 @@ class OrderViewSet(viewsets.ModelViewSet):
                 raise ValidationError("Email is required for unauthenticated requests.")
             return get_object_or_404(Order, email=order_email, pk=order_id)
 
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieve a specific order instance.
+        """
+        order_id = self.kwargs.get("pk")
+        cache_key = self.get_cache_key(order_id)
+        cached_data = cache.get(cache_key)
+        if cached_data is not None:
+            return Response(cached_data)
+
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        data = serializer.data
+
+        cache.set(cache_key, data, timeout=CACHE_TTL)
+
+        return Response(data)
+
     def create(self, request, *args, **kwargs):
         """Handle creating a new order."""
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def perform_create(self, serializer):
+        """
+        Perform actions when creating instance.
+
+        :param serializer: The serializer instance used for validation and saving.
+        :return:
+        """
+        instance = serializer.save()
+        # Clear the list cache when a new order is created
+        cache.delete("orders_list")
+        return instance
+
+    def perform_update(self, serializer) -> None:
+        """
+        Perform actions when updating Order instance.
+
+        :param serializer: The serializer instance used for validation and saving.
+        :return:
+        """
+        instance = serializer.save()
+
+        # Clear individual order cache and list cache
+        order_id = self.kwargs.get("pk")
+        cache.delete(self.get_cache_key(order_id))
+        cache.delete("orders_list")
+
+        return instance
 
     @action(detail=True, methods=["POST"])
     def pay(self, request, pk):
@@ -79,12 +138,23 @@ class OrderViewSet(viewsets.ModelViewSet):
         :param pk: Primary key of the order.
         :return: Response with payment URL.
         """
+        cache_key = self.get_cache_key(order_id=pk)
+
+        # Check if response is already cached
+        cached_response = cache.get(cache_key)
+        if cached_response:
+            return Response(cached_response["data"], status=cached_response["status"])
+
+        # if not cached, generate a new payment url
         order_instance = self.get_object()
         cost = str(order_instance.total_order_price)
         order_id = str(order_instance.id)
 
         liqpay = Payment()
         payment_response, status_code = liqpay.generate_new_url_for_pay(order_id, cost)
+
+        # cache the response
+        cache.set(cache_key, {"data": payment_response, "status": status_code}, timeout=CACHE_TTL)
 
         return Response(payment_response, status=status_code)
 
