@@ -260,7 +260,10 @@ class UserViewSet(CachedListView, viewsets.ModelViewSet):
         :return:
         """
         # Clear the list cache when a new user is created
+        instance = serializer.save()
+        # Clear the list cache when a new order is created
         cache.delete("user_list")
+        return instance
 
     @swagger_auto_schema(
         operation_description="Registration of new user",
@@ -334,10 +337,13 @@ class UserViewSet(CachedListView, viewsets.ModelViewSet):
         :param serializer: The serializer instance used for validation and saving.
         :return:
         """
+        instance = serializer.save()
         # Clear individual user cache and list cache
         user_id = self.kwargs.get("pk")
         cache.delete(self.get_cache_key(user_id))
         cache.delete("user_list")
+
+        return instance
 
     def perform_destroy(self, instance) -> None:
         """

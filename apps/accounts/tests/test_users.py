@@ -3,6 +3,8 @@ Test module for user-related functionality in a Django Rest Framework API.
 
 Tests cover scenarios related to user registration, retrieving and deletion
 """
+import logging
+
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework import status
@@ -22,6 +24,16 @@ class UserAPITestCase(APITestCase):
         }
         self.user = User.objects.create_user(**self.user_data)
         self.client.force_authenticate(user=self.user)
+
+        # Reduce the log level to avoid messages like 'bad request'
+        logger = logging.getLogger("django.request")
+        self.previous_level = logger.getEffectiveLevel()
+        logger.setLevel(logging.ERROR)
+
+    def tearDown(self) -> None:
+        """Reset the log level back to normal."""
+        logger = logging.getLogger("django.request")
+        logger.setLevel(self.previous_level)
 
     def test_create_user(self):
         """Test creating account."""
