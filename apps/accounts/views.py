@@ -349,8 +349,7 @@ class UserViewSet(CachedListMixin, viewsets.ModelViewSet):
         """
         Perform actions when deleting CustomUser instance.
 
-        :param serializer: The serializer instance used for validation and saving.
-        :return:
+        :param instance: instance to be deleted.
         """
         # Clear individual user cache and list cache
         user_id = self.kwargs.get("pk")
