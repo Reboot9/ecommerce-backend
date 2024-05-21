@@ -26,10 +26,12 @@ class OrderItemViewSet(CachedListMixin, viewsets.ModelViewSet):
 
         :return: cache key for the order items.
         """
+        base_key = self.request.path
+        if self.request.GET:
+            base_key += f"?{self.request.GET.urlencode()}"
         if order_item_id is not None:
-            return f"order_item_detail:{self.request.path}?{self.request.GET.urlencode()}"
-
-        return f"order_item_list:{self.request.path}?{self.request.GET.urlencode()}"
+            return f"order_item_detail:{base_key}:{order_item_id}"
+        return f"order_item_list:{base_key}"
 
     def get_permissions(self):
         """Set permissions based on the action."""
@@ -70,8 +72,14 @@ class OrderItemViewSet(CachedListMixin, viewsets.ModelViewSet):
         order_instance.items.add(order_item)
         order_instance.save()
 
-        # Clear the list cache when a new order is created
-        cache.delete("order_item_list")
+        # Clear the list cache when a new order item is created
+        cache.delete(f"order_item_list:{self.request.path}?{self.request.GET.urlencode()}")
+
+        # Invalidate related order cache
+        cache.delete(
+            f"orders_detail:{self.request.path}?{self.request.GET.urlencode()}:{order_id}"
+        )
+        cache.delete(f"orders_list:{self.request.path}?{self.request.GET.urlencode()}")
         return order_instance
 
     def retrieve(self, request, *args, **kwargs):
@@ -100,11 +108,15 @@ class OrderItemViewSet(CachedListMixin, viewsets.ModelViewSet):
         :return:
         """
         instance = serializer.save()
+        request_path = self.request.path
+        # Invalidate order item cache
+        cache.delete(self.get_cache_key(order_item_id=instance.id))
+        cache.delete(f"order_item_list:{request_path}?{self.request.GET.urlencode()}")
 
-        # Clear individual order cache and list cache
-        order_item_id = self.kwargs.get("pk")
-        cache.delete(self.get_cache_key(order_item_id))
-        cache.delete("order_item_list")
+        # Invalidate related order cache
+        order_id = instance.order.id
+        cache.delete(f"orders_detail:{request_path}?{self.request.GET.urlencode()}:{order_id}")
+        cache.delete(f"orders_list:{request_path}?{self.request.GET.urlencode()}")
 
         return instance
 
@@ -115,7 +127,14 @@ class OrderItemViewSet(CachedListMixin, viewsets.ModelViewSet):
         :param instance: instance to be destroyed.
         """
         # clear cache before deleting an instance
-        order_item_id = self.kwargs.get("pk")
-        cache.delete(instance.get_cache_key(order_item_id))
-        cache.delete("order_items_list")
+        request_path = self.request.path
+        # Invalidate order item cache
+        cache.delete(self.get_cache_key(order_item_id=instance.id))
+        cache.delete(f"order_item_list:{request_path}?{self.request.GET.urlencode()}")
+
+        # Invalidate related order cache
+        order_id = instance.order.id
+        cache.delete(f"orders_detail:{request_path}?{self.request.GET.urlencode()}:{order_id}")
+        cache.delete(f"orders_list:{request_path}?{self.request.GET.urlencode()}")
+
         instance.delete()

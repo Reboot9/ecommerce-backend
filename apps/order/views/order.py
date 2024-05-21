@@ -29,10 +29,12 @@ class OrderViewSet(CachedListMixin, viewsets.ModelViewSet):
 
         :return: cache key for the orders.
         """
+        base_key = self.request.path
+        if self.request.GET:
+            base_key += f"?{self.request.GET.urlencode()}"
         if order_id is not None:
-            return f"orders_detail:{self.request.path}?{self.request.GET.urlencode()}"
-
-        return f"orders_list:{self.request.path}?{self.request.GET.urlencode()}"
+            return f"orders_detail:{base_key}:{order_id}"
+        return f"orders_list:{base_key}"
 
     def get_permissions(self):
         """Set permissions based on the action."""
@@ -121,11 +123,17 @@ class OrderViewSet(CachedListMixin, viewsets.ModelViewSet):
         :return:
         """
         instance = serializer.save()
+        # Invalidate order cache
+        cache.delete(self.get_cache_key(order_id=instance.id))
+        cache.delete(f"orders_list:{self.request.path}?{self.request.GET.urlencode()}")
 
-        # Clear individual order cache and list cache
-        order_id = self.kwargs.get("pk")
-        cache.delete(self.get_cache_key(order_id))
-        cache.delete("orders_list")
+        # Invalidate related order items cache
+        order_items = instance.items.all()
+        for item in order_items:
+            cache.delete(
+                f"order_item_detail:{self.request.path}?{self.request.GET.urlencode()}:{item.id}"
+            )
+        cache.delete(f"order_item_list:{self.request.path}?{self.request.GET.urlencode()}")
 
         return instance
 
@@ -133,9 +141,20 @@ class OrderViewSet(CachedListMixin, viewsets.ModelViewSet):
         """
         Perform actions when deleting Order instance.
         """
-        order_id = self.kwargs.get("pk")
-        cache.delete(instance.get_cache_key(order_id))
-        cache.delete("orders_list")
+        order_id = instance.id
+
+        # Invalidate the order cache
+        cache.delete(self.get_cache_key(order_id=order_id))
+        cache.delete(f"orders_list:{self.request.path}?{self.request.GET.urlencode()}")
+
+        # Invalidate the related order items cache
+        order_items = instance.items.all()
+        for item in order_items:
+            cache.delete(
+                f"order_item_detail:{self.request.path}?{self.request.GET.urlencode()}:{item.id}"
+            )
+        cache.delete(f"order_item_list:{self.request.path}?{self.request.GET.urlencode()}")
+
         instance.delete()
 
     @action(detail=True, methods=["POST"])

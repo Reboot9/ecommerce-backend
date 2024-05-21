@@ -1,9 +1,8 @@
 """
 Django signals related to the order app.
 """
-from django.core.cache import cache
 from django.db.models import Max
-from django.db.models.signals import pre_save, post_save, post_delete
+from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 
 from apps.order.models.order import Order
@@ -119,23 +118,3 @@ def create_reserves_for_order_item(sender, instance, created, **kwargs):
         if not created:
             transaction.quantity = instance.quantity
             transaction.save()
-
-
-@receiver(post_save, sender=Order)
-@receiver(post_delete, sender=Order)
-def clear_order_cache(sender, instance, **kwargs) -> None:
-    """
-    Signal receiver function to update category cache when an Order instance is saved or deleted.
-    """
-    cache_key_pattern = "orders*"
-    cache.delete_pattern(cache_key_pattern)
-
-
-@receiver(post_save, sender=OrderItem)
-@receiver(post_delete, sender=OrderItem)
-def clear_order_item_cache(sender, instance, **kwargs) -> None:
-    """
-    Signal receiver to clear product cache when an Order Item instance is saved or deleted.
-    """
-    cache_key_pattern = "order_item*"
-    cache.delete_pattern(cache_key_pattern)
