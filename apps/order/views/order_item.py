@@ -107,3 +107,15 @@ class OrderItemViewSet(CachedListMixin, viewsets.ModelViewSet):
         cache.delete("order_item_list")
 
         return instance
+
+    def perform_destroy(self, instance) -> None:
+        """
+        Perform actions when deleting an Order Item instance.
+
+        :param instance: instance to be destroyed.
+        """
+        # clear cache before deleting an instance
+        order_item_id = self.kwargs.get("pk")
+        cache.delete(instance.get_cache_key(order_item_id))
+        cache.delete("order_items_list")
+        instance.delete()

@@ -129,6 +129,15 @@ class OrderViewSet(CachedListMixin, viewsets.ModelViewSet):
 
         return instance
 
+    def perform_destroy(self, instance) -> None:
+        """
+        Perform actions when deleting Order instance.
+        """
+        order_id = self.kwargs.get("pk")
+        cache.delete(instance.get_cache_key(order_id))
+        cache.delete("orders_list")
+        instance.delete()
+
     @action(detail=True, methods=["POST"])
     def pay(self, request, pk):
         """
