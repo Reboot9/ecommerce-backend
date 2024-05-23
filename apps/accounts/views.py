@@ -21,6 +21,7 @@ from apps.accounts.serializers.token import TokenRefreshResponseSerializer
 from apps.accounts.serializers.user import UserSerializer
 from apps.base.mixins import CachedListMixin
 from apps.base.pagination import PaginationCommon
+from apps.base.throttling import AuthenticationRateThrottle
 
 # TODO: consider about adding more Swagger things like tags
 #  and implement authentication in Swagger via JWT
@@ -32,6 +33,9 @@ class DecoratedTokenObtainPairView(jwt_views.TokenObtainPairView):
     """
     Extended view for obtaining JSON Web Tokens with Swagger documentation.
     """
+
+    throttle_classes = [AuthenticationRateThrottle]
+    throttle_scope = "auth"
 
     @swagger_auto_schema(
         operation_description="Takes a set of user credentials and returns an access and refresh"
@@ -75,6 +79,9 @@ class DecoratedTokenRefreshView(jwt_views.TokenRefreshView):
     """
     Extended view for refreshing JSON Web Tokens with Swagger documentation.
     """
+
+    throttle_classes = [AuthenticationRateThrottle]
+    throttle_scope = "auth"
 
     @swagger_auto_schema(
         operation_description="Takes a refresh type JSON web token and returns an access type JSON"
@@ -206,6 +213,8 @@ class UserViewSet(CachedListMixin, viewsets.ModelViewSet):
 
     serializer_class = UserSerializer
     pagination_class = PaginationCommon
+    throttle_classes = [AuthenticationRateThrottle]
+    throttle_scope = "auth"
 
     def get_queryset(self) -> QuerySet[CustomUser]:
         """
