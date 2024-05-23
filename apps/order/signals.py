@@ -90,7 +90,7 @@ def create_reserves_for_order_item(sender, instance, created, **kwargs):
             )
 
             # Deactivate related reserve
-            Reserve.objects.get(
+            Reserve.objects.get_or_create(
                 order=order,
                 reserved_item=instance.product,
             ).update(is_active=False)
@@ -101,12 +101,20 @@ def create_reserves_for_order_item(sender, instance, created, **kwargs):
             order=order,
             reserved_item=instance.product,
         )
-        transaction = Transaction.objects.get(
-            order_item=instance, transaction_type=Transaction.TransactionTypeChoices.ORDER
+
+        transaction, created = Transaction.objects.get_or_create(
+            order_item=instance,
+            transaction_type=Transaction.TransactionTypeChoices.ORDER,
+            defaults={
+                "product": instance.product,
+                "quantity": instance.quantity,
+                "is_active": True,
+            },
         )
 
         reserve.quantity = instance.quantity
         reserve.save()
 
-        transaction.quantity = instance.quantity
-        transaction.save()
+        if not created:
+            transaction.quantity = instance.quantity
+            transaction.save()

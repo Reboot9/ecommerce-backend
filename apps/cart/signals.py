@@ -3,7 +3,7 @@ Django signals related to the Cart models.
 """
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 
 from apps.cart.models import Cart
@@ -20,13 +20,33 @@ User = get_user_model()
 #         CartItem.objects.filter(cart=cart, product=instance).update(price=instance.price)
 
 
+@receiver(post_save, sender=User)
+def create_cart_for_user(sender, instance, created, **kwargs):
+    """Create cart for user if he just created his account."""
+    if created:
+        Cart.objects.create(user=instance)
+
+
+@receiver(post_delete, sender=Cart)
+def recreate_cart_for_user(sender, instance, **kwargs):
+    """Create a new cart for the user after the existing one is deleted."""
+    user = instance.user
+    # Check if the user exists and if they have any active carts
+    if user:
+        active_cart_exists = Cart.objects.filter(user=user, is_active=True).exists()
+        if not active_cart_exists:
+            Cart.objects.create(user=user)
+
+
 @receiver(post_save, sender=Order)
 def delete_cart_after_order(sender, instance, created, **kwargs):
     """Make the cart inactive after creating an order."""
     if created:
         try:
             user = User.objects.get(email=instance.email)
-            cart = Cart.objects.get(user=user, is_active=True).update(is_active=False)  # noqa: F841
+            cart = Cart.objects.get(user=user, is_active=True)  # noqa: F841
+            cart.is_active = False
+            cart.save()
         except ObjectDoesNotExist:
             pass  # Cart or user not found, this is possible in two cases:
             # if the user is not registered

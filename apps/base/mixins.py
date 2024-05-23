@@ -9,7 +9,7 @@ from rest_framework.response import Response
 CACHE_TTL = getattr(settings, "CACHE_TTL", DEFAULT_TIMEOUT)
 
 
-class CachedListView:
+class CachedListMixin:
     """
     A mixin providing common functionality for retrieving a paginated list.
 
@@ -58,7 +58,7 @@ class CachedListView:
         return Response(data)
 
 
-class CachedRetrieveView:
+class CachedRetrieveMixin:
     """
     A mixin providing common functionality for retrieving a single object.
 

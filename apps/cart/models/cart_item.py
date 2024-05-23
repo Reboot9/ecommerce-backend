@@ -29,17 +29,14 @@ class CartItem(BaseID, BaseDate):
         verbose_name_plural = "Cart items"
 
     def __str__(self) -> str:
-        """This method is automatically called when you use the str() function.
-
-        Or when the object needs to be represented as a string
+        """
+        This method is automatically called when you use the str() function.
         """
         return f"CartItem for {self.product} for {self.cart}, " f"cost - {self.cost}"
 
     @property
     def cost(self) -> decimal.Decimal:
         """Calculate the total cost of item in the cart."""
-        # TODO DO I NEED TO ADD discount_percentage, cost METHOD AND TOTAL PRICE TO ORDER
-        #  for admin???
         cost = (
             self.quantity * self.product.price * ((100 - self.product.discount_percentage) / 100)
         )

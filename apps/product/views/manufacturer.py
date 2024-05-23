@@ -1,7 +1,5 @@
 """
-Module: views.py.
-
-This module contains handler for the manufacturer.
+This module contains manufacturer-related views.
 """
 from rest_framework.generics import ListAPIView
 
@@ -10,7 +8,9 @@ from apps.product.serializers.manufacturer import ManufacturerSerializer
 
 
 class ManufacturerListView(ListAPIView):
-    """Returns a list of manufacturer."""
+    """
+    API endpoint that returns a list of manufacturers.
+    """
 
     serializer_class = ManufacturerSerializer
     queryset = Manufacturer.objects.all()

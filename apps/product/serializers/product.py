@@ -30,14 +30,24 @@ class ProductListSerializer(BaseDateSerializer, serializers.ModelSerializer):
     priceDiscount = serializers.DecimalField(
         source="price_discount", max_digits=10, decimal_places=2, read_only=True
     )
-    productCode = serializers.CharField(source="product_code")
-    descriptionShort = serializers.CharField(source="description_short", max_length=256)
+    productCode = serializers.CharField(
+        source="product_code",
+        read_only=True,
+    )
+    descriptionShort = serializers.CharField(
+        source="description_short",
+        max_length=256,
+        read_only=True,
+    )
     discountPercentage = serializers.DecimalField(
-        source="discount_percentage", max_digits=4, decimal_places=2
+        source="discount_percentage",
+        max_digits=4,
+        decimal_places=2,
+        read_only=True,
     )
     categories = serializers.SlugRelatedField(
         read_only=True,
-        slug_field="slug",  # Assuming 'slug' is the field in the Category model you want to use
+        slug_field="slug",
     )
 
     class Meta:

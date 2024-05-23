@@ -62,7 +62,9 @@ class CartItemSerializer(serializers.ModelSerializer):
         quantity = validated_data.get("quantity", 1)
 
         if not product_id:
-            raise ValidationError("productID is required when creating CartItem instance.")
+            raise ValidationError(
+                {"productID": "productID is required when creating CartItem instance."}
+            )
 
         # Check if a cart item with the same product already exists in the cart
         existing_cart_item = CartItem.objects.filter(cart=cart, product=product_id).first()

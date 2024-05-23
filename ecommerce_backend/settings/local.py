@@ -58,7 +58,29 @@ CACHES = {
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },
-    }
+    },
+    "alternate": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": f"redis://{os.environ.get('REDIS_HOST')}:{os.environ.get('REDIS_PORT')}/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+    },
+}
+
+REST_FRAMEWORK = {
+    "DEFAULT_THROTTLE_CLASSES": [
+        "apps.base.throttling.CustomAnonThrottle",
+        "apps.base.throttling.AuthenticationRateThrottle",
+        "apps.base.throttling.UserThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "auth": "3/minute",
+        "anon": "30/hour",
+        "authenticated": "15/minute",
+        "admin": None,
+    },
+    "EXCEPTION_HANDLER": "apps.base.throttling.throttling_exception_handler",
 }
 
 # Set cache ttl to 15 minutes

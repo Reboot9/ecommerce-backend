@@ -19,8 +19,9 @@ from apps.accounts import schemas
 from apps.accounts.models import CustomUser
 from apps.accounts.serializers.token import TokenRefreshResponseSerializer
 from apps.accounts.serializers.user import UserSerializer
-from apps.base.mixins import CachedListView
+from apps.base.mixins import CachedListMixin
 from apps.base.pagination import PaginationCommon
+from apps.base.throttling import AuthenticationRateThrottle
 
 # TODO: consider about adding more Swagger things like tags
 #  and implement authentication in Swagger via JWT
@@ -32,6 +33,9 @@ class DecoratedTokenObtainPairView(jwt_views.TokenObtainPairView):
     """
     Extended view for obtaining JSON Web Tokens with Swagger documentation.
     """
+
+    throttle_classes = [AuthenticationRateThrottle]
+    throttle_scope = "auth"
 
     @swagger_auto_schema(
         operation_description="Takes a set of user credentials and returns an access and refresh"
@@ -75,6 +79,9 @@ class DecoratedTokenRefreshView(jwt_views.TokenRefreshView):
     """
     Extended view for refreshing JSON Web Tokens with Swagger documentation.
     """
+
+    throttle_classes = [AuthenticationRateThrottle]
+    throttle_scope = "auth"
 
     @swagger_auto_schema(
         operation_description="Takes a refresh type JSON web token and returns an access type JSON"
@@ -199,13 +206,15 @@ class DecoratedTokenRefreshView(jwt_views.TokenRefreshView):
         },
     ),
 )
-class UserViewSet(CachedListView, viewsets.ModelViewSet):
+class UserViewSet(CachedListMixin, viewsets.ModelViewSet):
     """
     User management API.
     """
 
     serializer_class = UserSerializer
     pagination_class = PaginationCommon
+    throttle_classes = [AuthenticationRateThrottle]
+    throttle_scope = "auth"
 
     def get_queryset(self) -> QuerySet[CustomUser]:
         """
@@ -224,7 +233,7 @@ class UserViewSet(CachedListView, viewsets.ModelViewSet):
         :return: cache key for the provided user
         """
         if user_id is not None:
-            return f"user_detail_{self.request.path}?{self.request.GET.urlencode()}"
+            return f"user_detail:{self.request.path}?{self.request.GET.urlencode()}"
 
         return f"user_list:{self.request.path}?{self.request.GET.urlencode()}"
 
@@ -260,7 +269,10 @@ class UserViewSet(CachedListView, viewsets.ModelViewSet):
         :return:
         """
         # Clear the list cache when a new user is created
+        instance = serializer.save()
+        # Clear the list cache when a new order is created
         cache.delete("user_list")
+        return instance
 
     @swagger_auto_schema(
         operation_description="Registration of new user",
@@ -334,17 +346,19 @@ class UserViewSet(CachedListView, viewsets.ModelViewSet):
         :param serializer: The serializer instance used for validation and saving.
         :return:
         """
+        instance = serializer.save()
         # Clear individual user cache and list cache
         user_id = self.kwargs.get("pk")
         cache.delete(self.get_cache_key(user_id))
         cache.delete("user_list")
 
+        return instance
+
     def perform_destroy(self, instance) -> None:
         """
         Perform actions when deleting CustomUser instance.
 
-        :param serializer: The serializer instance used for validation and saving.
-        :return:
+        :param instance: instance to be deleted.
         """
         # Clear individual user cache and list cache
         user_id = self.kwargs.get("pk")

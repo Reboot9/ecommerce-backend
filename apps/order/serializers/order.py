@@ -7,6 +7,7 @@ from decimal import Decimal
 
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
 
 from apps.base.serializers import BaseDateSerializer
 from apps.cart.models import Cart
@@ -78,14 +79,15 @@ class OrderSerializer(BaseDateSerializer, serializers.ModelSerializer):
             cart_id = validated_data.pop("cartID", None)
             if cart_id:
                 if not request.user.is_authenticated:
-                    raise serializers.ValidationError(
-                        "Only authenticated users can create orders via cart."
-                    )
+                    raise PermissionDenied("Only authenticated users can create orders via cart.")
                 cart = get_object_or_404(Cart, is_active=True, user=request.user, id=cart_id)
                 validated_data["items"] = [
-                    {"productID": item.product.id, "quantity": item.quantity}
+                    {"product_id": item.product.id, "quantity": item.quantity}
                     for item in cart.items.all()
                 ]
+
+                if not validated_data["items"]:
+                    raise serializers.ValidationError("Cannot create an order if cart is empty.")
 
         order_items = validated_data.pop("items", None)
         delivery = validated_data.pop("delivery", None)
