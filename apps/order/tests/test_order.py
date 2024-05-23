@@ -309,7 +309,7 @@ class OrderAPITestCase(OrderSetupMixin, APITestCase):
 
         response = self.client.get(url, format="json")
 
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_order_patch_as_admin(self):
         """Test that admin can patch an order."""

@@ -120,7 +120,7 @@ class CartAPITestCase(ProductSetupMixin, APITestCase):
         url = reverse("cart:carts-list")
         response = self.client.get(url)
 
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_cart_retrieval(self):
         """Test cart retrieval as detail doesn't work."""

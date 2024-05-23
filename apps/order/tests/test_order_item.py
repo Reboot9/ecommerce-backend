@@ -160,7 +160,8 @@ class OrderItemAPITestCase(OrderSetupMixin, APITestCase):
         self.client.logout()
         url = reverse("order:order-items-list", kwargs={"order_id": self.order.pk})
         response = self.client.get(url, format="json")
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_retrieve_order_item_authenticated(self):
         """Test retrieve of order item as admin and order owner."""
@@ -184,7 +185,7 @@ class OrderItemAPITestCase(OrderSetupMixin, APITestCase):
         )
         response = self.client.get(url, format="json")
 
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_create_order_item(self, with_auth=True):
         """
@@ -208,7 +209,7 @@ class OrderItemAPITestCase(OrderSetupMixin, APITestCase):
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
             self.assert_order_item_response_data(response_data)
         else:
-            self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
             self.assertEqual(
                 response_data["detail"], "Authentication credentials were not provided."
             )
