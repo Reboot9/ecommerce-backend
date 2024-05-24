@@ -1,7 +1,8 @@
 #!/bin/sh
 set -e
 
-export DJANGO_SETTINGS_MODULE=ecommerce_backend.settings.local
+# Set DJANGO_SETTINGS_MODULE based on an environment variable
+export DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE:-ecommerce_backend.settings.local}
 
 ./wait-for-it.sh $DB_HOST:$DB_PORT -t 60
 
